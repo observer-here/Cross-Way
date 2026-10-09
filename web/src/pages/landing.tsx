@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+import { Logo } from "@/shared/ui/logo";
+
 const nav = [
   { href: "#home", label: "Home" },
   { href: "#features", label: "Features" },
@@ -8,18 +10,6 @@ const nav = [
   { href: "#security", label: "Security" },
   { href: "#docs", label: "Docs" },
 ];
-
-function Logo() {
-  return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <span className="relative grid h-8 w-8 place-items-center">
-        <span className="absolute h-7 w-2.5 rotate-45 rounded-md bg-indigo-500" />
-        <span className="absolute h-7 w-2.5 -rotate-45 rounded-md bg-violet-400" />
-      </span>
-      <span className="text-sm font-semibold tracking-[0.16em] whitespace-nowrap text-slate-800">CROSS WAY</span>
-    </Link>
-  );
-}
 
 export function LandingPage() {
   return (

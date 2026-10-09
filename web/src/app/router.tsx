@@ -4,6 +4,7 @@ import { Layout } from "./layout";
 import { HistoryPage } from "@/pages/history";
 import { HomePage } from "@/pages/home";
 import { LandingPage } from "@/pages/landing";
+import { LinksPage } from "@/pages/links";
 import { LoginPage } from "@/pages/login";
 import { PayPage } from "@/pages/pay";
 import { RequestPage } from "@/pages/request";
@@ -20,6 +21,7 @@ export function AppRouter() {
           <Route path="/app" element={<HomePage />} />
           <Route path="/send" element={<SendPage />} />
           <Route path="/request" element={<RequestPage />} />
+          <Route path="/links" element={<LinksPage />} />
           <Route path="/pay/:id" element={<PayPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

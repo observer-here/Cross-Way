@@ -6,6 +6,7 @@ const icons: Record<string, { bg: string; mark: string }> = {
   out: { bg: "bg-sky-50 text-sky-500", mark: "➤" },
   in: { bg: "bg-emerald-50 text-emerald-500", mark: "↓" },
   req: { bg: "bg-fuchsia-50 text-fuchsia-500", mark: "▦" },
+  link: { bg: "bg-teal-50 text-teal-500", mark: "⚭" },
 };
 
 export function Activity() {
