@@ -4,7 +4,7 @@ export function SendPage() {
   return (
     <section className="mx-auto max-w-md px-6 py-10">
       <h1 className="text-2xl font-semibold">Send</h1>
-      <p className="mt-1 text-sm text-white/45">Pay anyone by username, email, user ID, or address.</p>
+      <p className="mt-1 text-sm text-slate-500">Pay anyone by username, email, user ID, or address.</p>
       <form className="panel mt-8 flex flex-col gap-5 p-6" onSubmit={(e) => e.preventDefault()}>
         <Field label="To">
           <Input name="to" placeholder="username, email, user id, or 0x address" required />
@@ -21,7 +21,7 @@ export function SendPage() {
         <Field label="Memo">
           <Input name="memo" placeholder="optional" />
         </Field>
-        <Submit>Send Payment</Submit>
+        <Submit>Send Payment →</Submit>
       </form>
     </section>
   );

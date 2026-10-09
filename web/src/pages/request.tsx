@@ -4,7 +4,7 @@ export function RequestPage() {
   return (
     <section className="mx-auto max-w-md px-6 py-10">
       <h1 className="text-2xl font-semibold">Request</h1>
-      <p className="mt-1 text-sm text-white/45">Ask for tokens or create a shareable payment link.</p>
+      <p className="mt-1 text-sm text-slate-500">Ask for tokens or create a shareable payment link.</p>
       <form className="panel mt-8 flex flex-col gap-5 p-6" onSubmit={(e) => e.preventDefault()}>
         <Field label="From">
           <Input name="from" placeholder="wallet, username, or leave blank for a link" />
@@ -21,7 +21,7 @@ export function RequestPage() {
         <Field label="Memo">
           <Input name="memo" placeholder="optional" />
         </Field>
-        <Submit>Create request</Submit>
+        <Submit>Create request →</Submit>
       </form>
     </section>
   );
