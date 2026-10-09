@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "db:local": "wrangler d1 execute crossway --local --file=migrations/0001_users.sql",
-    "db:remote": "wrangler d1 execute crossway --remote --file=migrations/0001_users.sql"
+    "db:local": "wrangler d1 execute crossway --local --file=migrations/0001_create_users.sql",
+    "db:remote": "wrangler d1 execute crossway --remote --file=migrations/0001_create_users.sql"
   },
   "dependencies": {
     "hono": "^4.6.14",

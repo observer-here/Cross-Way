@@ -10,14 +10,7 @@ export type Env = {
   EURC: string;
 };
 
-export type AppVars = { userId: string };
-
-export type User = {
-  id: string;
-  email: string;
-  username: string | null;
-  user_id: string | null;
-  wallet: string;
-  created_at: number;
-  updated_at: number;
+export type AppEnv = {
+  Bindings: Env;
+  Variables: { userId: string };
 };
