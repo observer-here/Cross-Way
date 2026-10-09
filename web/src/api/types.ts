@@ -1,11 +1,3 @@
-export type ChainConfig = {
-  chainId: number;
-  rpcUrl: string;
-  contract: string;
-  usdc: string;
-  eurc: string;
-};
-
 export type User = {
   id: string;
   email: string;
@@ -14,17 +6,4 @@ export type User = {
   wallet: string;
   created_at: number;
   updated_at: number;
-};
-
-export type PublicUser = {
-  wallet: string;
-  username: string | null;
-  userId: string | null;
-};
-
-export type LookupQuery = {
-  email?: string;
-  username?: string;
-  userId?: string;
-  wallet?: string;
 };
