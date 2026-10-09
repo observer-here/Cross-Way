@@ -2,9 +2,10 @@ import { Field, Input, Select, Submit } from "@/shared/ui/field";
 
 export function SendPage() {
   return (
-    <section className="max-w-md">
-      <h1 className="text-xl font-semibold">Send</h1>
-      <form className="mt-8 flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+    <section className="mx-auto max-w-md px-6 py-10">
+      <h1 className="text-2xl font-semibold">Send</h1>
+      <p className="mt-1 text-sm text-white/45">Pay anyone by username, email, user ID, or address.</p>
+      <form className="panel mt-8 flex flex-col gap-5 p-6" onSubmit={(e) => e.preventDefault()}>
         <Field label="To">
           <Input name="to" placeholder="username, email, user id, or 0x address" required />
         </Field>
@@ -18,9 +19,9 @@ export function SendPage() {
           </Select>
         </Field>
         <Field label="Memo">
-          <Input name="memo" />
+          <Input name="memo" placeholder="optional" />
         </Field>
-        <Submit>Send</Submit>
+        <Submit>Send Payment</Submit>
       </form>
     </section>
   );

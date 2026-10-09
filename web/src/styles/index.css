@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Caveat", cursive;
+  --color-ink: #070b18;
+  --color-panel: #10182c;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-accent: #8b7cff;
+}
+
 html,
 body,
 #root {
@@ -8,13 +17,9 @@ body,
 
 body {
   margin: 0;
-  background: #fafafa;
-  color: #111;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    sans-serif;
+  background: #070b18;
+  color: #eef2ff;
+  font-family: var(--font-sans);
 }
 
 input,
@@ -22,4 +27,33 @@ select,
 button,
 textarea {
   font: inherit;
+}
+
+.panel {
+  background: linear-gradient(180deg, rgb(22 32 58 / 0.92), rgb(12 18 36 / 0.92));
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 1.25rem;
+}
+
+.hero-glow {
+  background:
+    radial-gradient(circle at 74% 38%, rgb(129 140 248 / 0.28), transparent 26%),
+    radial-gradient(circle at 80% 62%, rgb(167 139 250 / 0.22), transparent 32%),
+    radial-gradient(ellipse at 50% 120%, rgb(14 20 40 / 0.9), transparent 50%);
+}
+
+.planet {
+  background:
+    radial-gradient(circle at 32% 28%, #eef2ff 0%, #c4b5fd 16%, #818cf8 38%, #312e81 64%, #070b18 100%);
+  box-shadow: 0 0 120px rgb(99 102 241 / 0.38);
+}
+
+.glass-cube {
+  transform: rotate(16deg);
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.04));
+  border: 1px solid rgb(255 255 255 / 0.28);
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 0.4),
+    0 0 80px rgb(139 124 255 / 0.35);
+  backdrop-filter: blur(14px);
 }

@@ -1,7 +1,8 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { Layout } from "./layout";
 import { HistoryPage } from "@/pages/history";
+import { HomePage } from "@/pages/home";
 import { LoginPage } from "@/pages/login";
 import { PayPage } from "@/pages/pay";
 import { RequestPage } from "@/pages/request";
@@ -14,7 +15,7 @@ export function AppRouter() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Layout />}>
-          <Route path="/" element={<Navigate to="/send" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/send" element={<SendPage />} />
           <Route path="/request" element={<RequestPage />} />
           <Route path="/pay/:id" element={<PayPage />} />
