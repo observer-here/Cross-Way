@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { Layout } from "./layout";
+import { RequireAuth } from "@/auth/guard";
 import { HistoryPage } from "@/pages/history";
 import { HomePage } from "@/pages/home";
 import { LandingPage } from "@/pages/landing";
@@ -17,7 +17,7 @@ export function AppRouter() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route element={<Layout />}>
+        <Route element={<RequireAuth />}>
           <Route path="/app" element={<HomePage />} />
           <Route path="/send" element={<SendPage />} />
           <Route path="/request" element={<RequestPage />} />

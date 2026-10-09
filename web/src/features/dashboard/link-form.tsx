@@ -1,31 +1,40 @@
+import { useState, type FormEvent } from "react";
+
+import { useArcWallet } from "@/chain/wallet";
+import { createPaymentLink } from "@/chain/write";
 import { Input, Select, Submit } from "@/shared/ui/field";
 
 export function LinkForm() {
+  const wallet = useArcWallet();
+  const [status, setStatus] = useState("");
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const amount = String(fd.get("amount") ?? "");
+    const symbol = String(fd.get("token") ?? "USDC");
+    const memo = String(fd.get("memo") ?? "");
+    setStatus("Creating…");
+    try {
+      const hash = await createPaymentLink(wallet, amount, symbol, memo);
+      setStatus(`Created. Tx ${hash.slice(0, 10)}…`);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : "failed");
+    }
+  }
+
   return (
     <section className="panel p-5">
       <h2 className="text-sm font-semibold">Create Payment Link</h2>
-      <form className="mt-4 flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
-        <div className="relative">
-          <Select defaultValue="USDC" className="pl-9">
-            <option value="USDC">USDC</option>
-            <option value="EURC">EURC</option>
-          </Select>
-          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sky-500">$</span>
-        </div>
-        <div className="relative">
-          <Input placeholder="25.00" defaultValue="25.00" className="pr-12" />
-          <span className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400">USD</span>
-        </div>
-        <div className="relative">
-          <Input placeholder="For project payment, coffee..." maxLength={200} />
-          <span className="absolute right-3 bottom-2.5 text-[10px] text-slate-300">0/200</span>
-        </div>
-        <label className="flex items-center gap-2 text-xs text-slate-500">
-          <input type="checkbox" defaultChecked className="accent-slate-900" />
-          Set expiry
-          <Input type="date" defaultValue="2026-10-16" className="ml-auto w-auto py-1.5" />
-        </label>
-        <Submit>Generate Link →</Submit>
+      <form className="mt-4 flex flex-col gap-4" onSubmit={onSubmit}>
+        <Select name="token" defaultValue="USDC">
+          <option value="USDC">USDC</option>
+          <option value="EURC">EURC</option>
+        </Select>
+        <Input name="amount" placeholder="0.00" inputMode="decimal" required />
+        <Input name="memo" placeholder="For project payment, coffee..." maxLength={200} />
+        <Submit disabled={!wallet.address}>{wallet.address ? "Generate Link →" : "Wallet loading…"}</Submit>
+        {status && <p className="text-xs text-slate-500">{status}</p>}
       </form>
     </section>
   );

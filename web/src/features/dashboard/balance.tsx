@@ -1,30 +1,53 @@
+import { useEffect, useState } from "react";
+
+import { useSession } from "@/auth/session";
+import { loadBalances } from "@/chain/read";
+import { ARC } from "@/chain/arc";
+
 export function Balance() {
+  const { wallet } = useSession();
+  const [data, setData] = useState<{ gas: string; usdc: string; eurc: string } | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    if (!wallet) return;
+    loadBalances(wallet)
+      .then(setData)
+      .catch((e) => setErr(e instanceof Error ? e.message : "failed"));
+  }, [wallet]);
+
   return (
     <section className="panel p-5">
       <div className="flex items-center justify-between text-xs text-slate-400">
-        <span className="flex items-center gap-2">Your Balance</span>
-        <span className="rounded-full bg-slate-50 px-2 py-1">USDC ▾</span>
+        <span>Your Balance</span>
+        <span>USDC</span>
       </div>
-      <p className="mt-3 text-4xl font-semibold tracking-tight">$152.60</p>
-      <p className="mt-1 text-xs text-emerald-500">▲ +12.4% (24h)</p>
-      <svg viewBox="0 0 320 88" className="mt-4 h-20 w-full">
-        <path d="M0 70 C40 68 55 40 90 48 C120 56 140 22 180 28 C220 34 240 50 280 24 C300 12 312 18 320 10 V88 H0 Z" fill="url(#bal)" />
-        <path d="M0 70 C40 68 55 40 90 48 C120 56 140 22 180 28 C220 34 240 50 280 24 C300 12 312 18 320 10" fill="none" stroke="#a78bfa" strokeWidth="2.5" />
-        <defs>
-          <linearGradient id="bal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#c4b5fd" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <button type="button" className="rounded-full border border-slate-200 py-2.5 text-sm">
-          Deposit
-        </button>
-        <button type="button" className="rounded-full border border-slate-200 py-2.5 text-sm">
-          Swap
-        </button>
-      </div>
+      {!wallet && <p className="mt-6 text-sm text-slate-400">Waiting for wallet…</p>}
+      {wallet && !data && !err && <p className="mt-6 text-sm text-slate-400">Loading…</p>}
+      {err && <p className="mt-6 text-sm text-rose-500">{err}</p>}
+      {data && (
+        <>
+          <p className="mt-3 text-4xl font-semibold tracking-tight">{data.usdc} USDC</p>
+          <ul className="mt-5 space-y-2 text-sm">
+            <li className="flex justify-between">
+              <span className="text-slate-500">EURC</span>
+              <span>{data.eurc}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-slate-500">Gas</span>
+              <span>{data.gas} USDC</span>
+            </li>
+          </ul>
+          <a
+            href={`${ARC.explorer}/address/${wallet}`}
+            className="mt-5 block text-center text-xs text-indigo-500"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View on explorer
+          </a>
+        </>
+      )}
     </section>
   );
 }

@@ -1,15 +1,22 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { txs } from "./data";
-
-const icons: Record<string, { bg: string; mark: string }> = {
-  out: { bg: "bg-sky-50 text-sky-500", mark: "➤" },
-  in: { bg: "bg-emerald-50 text-emerald-500", mark: "↓" },
-  req: { bg: "bg-fuchsia-50 text-fuchsia-500", mark: "▦" },
-  link: { bg: "bg-teal-50 text-teal-500", mark: "⚭" },
-};
+import { useSession } from "@/auth/session";
+import { loadActivity, type ActivityItem } from "@/chain/read";
+import { shortAddress } from "@/lib/format";
 
 export function Activity() {
+  const { wallet } = useSession();
+  const [rows, setRows] = useState<ActivityItem[] | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    if (!wallet) return;
+    loadActivity(wallet)
+      .then(setRows)
+      .catch((e) => setErr(e instanceof Error ? e.message : "failed"));
+  }, [wallet]);
+
   return (
     <section className="panel p-5">
       <div className="flex items-center justify-between">
@@ -18,30 +25,28 @@ export function Activity() {
           View All →
         </Link>
       </div>
-      <ul className="mt-4 space-y-4">
-        {txs.map((tx) => {
-          const icon = icons[tx.dir] ?? icons.in;
-          return (
-            <li key={tx.time + tx.kind} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 text-sm">
-              <span className="flex min-w-0 items-center gap-3">
-                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${icon.bg}`}>{icon.mark}</span>
-                <span className="truncate">
-                  <span className="block truncate">
-                    {tx.kind} {tx.name}
-                  </span>
-                  <span className="text-xs text-slate-400">{tx.time}</span>
+      {!wallet && <p className="mt-6 text-sm text-slate-400">Waiting for wallet…</p>}
+      {wallet && !rows && !err && <p className="mt-6 text-sm text-slate-400">Loading…</p>}
+      {err && <p className="mt-6 text-sm text-rose-500">{err}</p>}
+      {rows && rows.length === 0 && <p className="mt-6 text-sm text-slate-400">No payments yet.</p>}
+      {rows && rows.length > 0 && (
+        <ul className="mt-4 space-y-4">
+          {rows.map((tx) => (
+            <li key={tx.id} className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm">
+              <span className="min-w-0">
+                <span className="block truncate">
+                  {tx.kind} {shortAddress(tx.counterparty)}
                 </span>
+                <span className="text-xs text-slate-400">{tx.time}</span>
               </span>
-              <span className={tx.dir === "out" ? "text-slate-700" : tx.dir === "req" ? "text-slate-700" : "text-emerald-500"}>
+              <span className={tx.dir === "out" ? "text-slate-700" : "text-emerald-500"}>
+                {tx.dir === "out" ? "-" : "+"}
                 {tx.amount} {tx.token}
               </span>
-              <span className={`rounded-full px-2 py-0.5 text-[11px] ${tx.status === "Pending" ? "bg-amber-50 text-amber-500" : "bg-emerald-50 text-emerald-500"}`}>
-                {tx.status}
-              </span>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
