@@ -1,0 +1,18 @@
+export const crossWayAbi = [
+  "function USERNAME() view returns (bytes32)",
+  "function EMAIL() view returns (bytes32)",
+  "function USER_ID() view returns (bytes32)",
+  "function USDC() view returns (address)",
+  "function EURC() view returns (address)",
+  "function resolve(bytes32 kind, string value) view returns (address)",
+  "function register(bytes32 kind, string value)",
+  "function unregister(bytes32 kind)",
+  "function sendToAddress(address to, address token, uint256 amount, bytes memo)",
+  "function sendTo(bytes32 kind, string value, address token, uint256 amount, uint64 expiresAt, bytes memo)",
+  "function createRequest(address payer, address token, uint256 amount, uint64 expiresAt, bytes memo) returns (uint256)",
+  "function createRequestTo(bytes32 kind, string value, address token, uint256 amount, uint64 expiresAt, bytes memo) returns (uint256)",
+  "function createLink(address token, uint256 amount, uint64 expiresAt, bytes memo) returns (uint256)",
+  "function pay(uint256 id, bytes memo)",
+  "function cancel(uint256 id)",
+  "function invoices(uint256 id) view returns (address payee, address payer, bytes32 payerKey, address token, uint256 amount, uint64 expiresAt, uint8 kind, bool closed)",
+] as const;

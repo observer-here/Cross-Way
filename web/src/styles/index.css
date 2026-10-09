@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #fafafa;
+  color: #111;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+input,
+select,
+button,
+textarea {
+  font: inherit;
+}
