@@ -1,21 +1,42 @@
-import { erc20Abi, parseAbiItem, type Address, zeroAddress } from "viem";
+import { decodeAbiParameters, type Address, zeroAddress } from "viem";
 
 import { fromTokenAmount } from "@/lib/format";
 
-import { crossWayAbi } from "./abi";
 import { ARC, TOKENS } from "./arc";
-import { publicClient } from "./public";
+import { scanGet } from "./scan";
+
+type ScanAddress = { coin_balance?: string };
+type ScanTokenBal = { value?: string; token?: { address_hash?: string; symbol?: string; decimals?: string } };
+type ScanTransfer = {
+  transaction_hash: string;
+  timestamp?: string;
+  method?: string | null;
+  from?: { hash?: string };
+  to?: { hash?: string };
+  token?: { address_hash?: string; symbol?: string; decimals?: string };
+  total?: { value?: string; decimals?: string };
+};
+type ScanLog = {
+  transaction_hash?: string;
+  timestamp?: string;
+  data?: string;
+  topics?: string[];
+  decoded?: { method_call?: string; parameters?: { name: string; value: string }[] };
+};
 
 export async function loadBalances(wallet: Address) {
-  const [gas, usdc, eurc] = await Promise.all([
-    publicClient.getBalance({ address: wallet }),
-    publicClient.readContract({ address: TOKENS.USDC.address, abi: erc20Abi, functionName: "balanceOf", args: [wallet] }),
-    publicClient.readContract({ address: TOKENS.EURC.address, abi: erc20Abi, functionName: "balanceOf", args: [wallet] }),
+  const [acct, tokens] = await Promise.all([
+    scanGet<ScanAddress>(`/addresses/${wallet}`),
+    scanGet<ScanTokenBal[]>(`/addresses/${wallet}/token-balances`),
   ]);
+  const list = Array.isArray(tokens) ? tokens : [];
+  const pick = (addr: string) => list.find((t) => t.token?.address_hash?.toLowerCase() === addr.toLowerCase());
+  const usdc = pick(TOKENS.USDC.address);
+  const eurc = pick(TOKENS.EURC.address);
   return {
-    gas: fromTokenAmount(gas, 18),
-    usdc: fromTokenAmount(usdc, 6),
-    eurc: fromTokenAmount(eurc, 6),
+    gas: fromTokenAmount(BigInt(acct.coin_balance ?? "0"), 18),
+    usdc: fromTokenAmount(BigInt(usdc?.value ?? "0"), Number(usdc?.token?.decimals ?? 6)),
+    eurc: fromTokenAmount(BigInt(eurc?.value ?? "0"), Number(eurc?.token?.decimals ?? 6)),
   };
 }
 
@@ -30,53 +51,79 @@ export type ActivityItem = {
   method: number;
 };
 
-const methods = ["Sent", "Request", "Link", "Claim"];
-
-const paidEvent = parseAbiItem(
-  "event Paid(address indexed from, address indexed to, address indexed token, uint256 amount, bytes32 key, uint8 method, uint256 refId, bytes memo)",
-);
+const wanted = new Set([TOKENS.USDC.address.toLowerCase(), TOKENS.EURC.address.toLowerCase()]);
 
 export async function loadActivity(wallet: Address): Promise<ActivityItem[]> {
-  const [sent, recv] = await Promise.all([
-    publicClient.getLogs({ address: ARC.contract, event: paidEvent, args: { from: wallet }, fromBlock: 0n }),
-    publicClient.getLogs({ address: ARC.contract, event: paidEvent, args: { to: wallet }, fromBlock: 0n }),
-  ]);
-  const logs = [...sent, ...recv].sort((a, b) => Number(b.blockNumber - a.blockNumber)).slice(0, 20);
-  const blocks = await Promise.all(
-    [...new Set(logs.map((l) => l.blockNumber))].map(async (n) => {
-      const b = await publicClient.getBlock({ blockNumber: n });
-      return [n.toString(), Number(b.timestamp) * 1000] as const;
-    }),
-  );
-  const times = Object.fromEntries(blocks);
-  return logs.map((log) => {
-    const token = log.args.token === TOKENS.EURC.address ? "EURC" : "USDC";
-    const method = Number(log.args.method ?? 0);
-    const dir = log.args.from?.toLowerCase() === wallet.toLowerCase() ? "out" : "in";
-    return {
-      id: `${log.transactionHash}-${log.logIndex}`,
-      dir,
-      kind: methods[method] ?? "Paid",
-      counterparty: (dir === "out" ? log.args.to : log.args.from) ?? "",
-      amount: fromTokenAmount(log.args.amount ?? 0n, 6),
-      token,
-      time: new Date(times[log.blockNumber.toString()] ?? Date.now()).toLocaleString(),
-      method,
-    };
-  });
+  const page = await scanGet<{ items?: ScanTransfer[] }>(`/addresses/${wallet}/token-transfers`);
+  const me = wallet.toLowerCase();
+  return (page.items ?? [])
+    .filter((row) => wanted.has(row.token?.address_hash?.toLowerCase() ?? ""))
+    .slice(0, 20)
+    .map((row) => {
+      const from = row.from?.hash ?? "";
+      const to = row.to?.hash ?? "";
+      const dir = from.toLowerCase() === me ? "out" : "in";
+      const decimals = Number(row.total?.decimals ?? row.token?.decimals ?? 6);
+      return {
+        id: `${row.transaction_hash}-${from}-${to}`,
+        dir,
+        kind: row.method || (dir === "out" ? "Sent" : "Received"),
+        counterparty: dir === "out" ? to : from,
+        amount: fromTokenAmount(BigInt(row.total?.value ?? "0"), decimals),
+        token: row.token?.symbol ?? "USDC",
+        time: row.timestamp ? new Date(row.timestamp).toLocaleString() : "",
+        method: 0,
+      };
+    });
 }
 
+const INVOICE_TOPIC = "0x013652cd6514bf2341791dd49f5b3c74d08951a91adc6b4d3a6b9d2567abe92a";
+
 export async function loadInvoice(id: bigint) {
-  const row = await publicClient.readContract({ address: ARC.contract, abi: crossWayAbi, functionName: "invoices", args: [id] });
-  if (row[0] === zeroAddress) return null;
+  const page = await scanGet<{ items?: ScanLog[] }>(`/addresses/${ARC.contract}/logs`);
+  const padded = `0x${id.toString(16).padStart(64, "0")}`;
+  const log = (page.items ?? []).find((item) => {
+    const topics = item.topics ?? [];
+    return topics[0]?.toLowerCase() === INVOICE_TOPIC && topics[1]?.toLowerCase() === padded;
+  });
+  if (!log) return null;
+  const topics = log.topics ?? [];
+  const payee = (`0x${(topics[2] ?? "").slice(-40)}` as Address) || zeroAddress;
+  const payer = (`0x${(topics[3] ?? "").slice(-40)}` as Address) || zeroAddress;
+  let tokenAddr = TOKENS.USDC.address as Address;
+  let amount = 0n;
+  let expiresAt = 0;
+  if (log.decoded?.parameters) {
+    const p = Object.fromEntries(log.decoded.parameters.map((x) => [x.name, x.value]));
+    tokenAddr = ((p.token as Address) || tokenAddr) as Address;
+    amount = BigInt(p.amount ?? "0");
+    expiresAt = Number(p.expiresAt ?? 0);
+  } else if (log.data && log.data !== "0x") {
+    const decoded = decodeAbiParameters(
+      [
+        { type: "bytes32" },
+        { type: "address" },
+        { type: "uint256" },
+        { type: "uint64" },
+        { type: "uint8" },
+        { type: "bytes" },
+      ],
+      log.data as `0x${string}`,
+    );
+    tokenAddr = decoded[1];
+    amount = decoded[2];
+    expiresAt = Number(decoded[3]);
+  }
+  if (payee === zeroAddress) return null;
+  const token = tokenAddr.toLowerCase() === TOKENS.EURC.address.toLowerCase() ? "EURC" : "USDC";
   return {
-    payee: row[0],
-    payer: row[1],
-    token: row[3] === TOKENS.EURC.address ? "EURC" : "USDC",
-    tokenAddress: row[3],
-    amount: fromTokenAmount(row[4], 6),
-    rawAmount: row[4],
-    expiresAt: Number(row[5]),
-    closed: row[7],
+    payee,
+    payer,
+    token,
+    tokenAddress: tokenAddr,
+    amount: fromTokenAmount(amount, 6),
+    rawAmount: amount,
+    expiresAt,
+    closed: false,
   };
 }
