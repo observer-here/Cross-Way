@@ -3,10 +3,6 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-script: "Caveat", cursive;
-  --color-ink: #070b18;
-  --color-panel: #10182c;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-accent: #8b7cff;
 }
 
 html,
@@ -17,8 +13,8 @@ body,
 
 body {
   margin: 0;
-  background: #070b18;
-  color: #eef2ff;
+  background: #eef1ff;
+  color: #16182b;
   font-family: var(--font-sans);
 }
 
@@ -38,13 +34,11 @@ textarea {
 .hero-glow {
   background:
     radial-gradient(circle at 74% 38%, rgb(129 140 248 / 0.28), transparent 26%),
-    radial-gradient(circle at 80% 62%, rgb(167 139 250 / 0.22), transparent 32%),
-    radial-gradient(ellipse at 50% 120%, rgb(14 20 40 / 0.9), transparent 50%);
+    radial-gradient(circle at 80% 62%, rgb(167 139 250 / 0.22), transparent 32%);
 }
 
 .planet {
-  background:
-    radial-gradient(circle at 32% 28%, #eef2ff 0%, #c4b5fd 16%, #818cf8 38%, #312e81 64%, #070b18 100%);
+  background: radial-gradient(circle at 32% 28%, #eef2ff 0%, #c4b5fd 16%, #818cf8 38%, #312e81 64%, #070b18 100%);
   box-shadow: 0 0 120px rgb(99 102 241 / 0.38);
 }
 
@@ -52,8 +46,29 @@ textarea {
   transform: rotate(16deg);
   background: linear-gradient(145deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.04));
   border: 1px solid rgb(255 255 255 / 0.28);
-  box-shadow:
-    0 24px 60px rgb(0 0 0 / 0.4),
-    0 0 80px rgb(139 124 255 / 0.35);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.4), 0 0 80px rgb(139 124 255 / 0.35);
   backdrop-filter: blur(14px);
+}
+
+.landing-sky {
+  background:
+    linear-gradient(180deg, rgb(248 246 255 / 0.78) 0%, rgb(244 246 255 / 0.28) 26%, rgb(255 255 255 / 0.05) 48%, rgb(248 250 255 / 0.72) 100%),
+    url("/landing-bg.jpg") center 38% / cover no-repeat;
+}
+
+.glass-x {
+  background: linear-gradient(145deg, rgb(255 255 255 / 0.72), rgb(196 181 253 / 0.28));
+  border: 1px solid rgb(255 255 255 / 0.8);
+  box-shadow:
+    0 30px 70px rgb(99 102 241 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.8);
+  backdrop-filter: blur(18px);
+  transform: rotate(-18deg);
+}
+
+.chip {
+  background: rgb(255 255 255 / 0.78);
+  border: 1px solid rgb(255 255 255 / 0.95);
+  box-shadow: 0 12px 30px rgb(80 70 160 / 0.12);
+  backdrop-filter: blur(10px);
 }

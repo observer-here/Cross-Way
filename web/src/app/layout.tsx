@@ -4,7 +4,7 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-[#070b18] text-white">
       <header className="flex items-center gap-4 px-6 py-4 lg:px-8">
-        <NavLink to="/" className="flex shrink-0 items-center gap-2.5">
+        <NavLink to="/app" className="flex shrink-0 items-center gap-2.5">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-linear-to-br from-violet-400 to-indigo-600 text-sm font-bold">
             X
           </span>

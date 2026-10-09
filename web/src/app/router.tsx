@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "./layout";
 import { HistoryPage } from "@/pages/history";
 import { HomePage } from "@/pages/home";
+import { LandingPage } from "@/pages/landing";
 import { LoginPage } from "@/pages/login";
 import { PayPage } from "@/pages/pay";
 import { RequestPage } from "@/pages/request";
@@ -13,9 +14,10 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/app" element={<HomePage />} />
           <Route path="/send" element={<SendPage />} />
           <Route path="/request" element={<RequestPage />} />
           <Route path="/pay/:id" element={<PayPage />} />
