@@ -63,7 +63,7 @@ async function exec(wallet: ArcWallet, functionName: "register" | "sendToAddress
 }
 
 export async function registerIdentity(wallet: ArcWallet, kind: Hex, value: string) {
-  const v = value.trim();
+  const v = kind === KIND.USER_ID ? value.trim() : value.trim().toLowerCase();
   if (!v || !wallet.address) return;
   const key = skipKey(wallet.address, kind, v);
   if (localStorage.getItem(key)) return;
