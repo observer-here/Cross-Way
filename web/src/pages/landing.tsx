@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+import { ARC } from "@/chain/arc";
+import { shortAddress } from "@/lib/format";
 import { Logo } from "@/shared/ui/logo";
 
 const nav = [
@@ -118,8 +120,8 @@ export function LandingPage() {
       </section>
 
       <footer id="security" className="flex flex-wrap items-center justify-between gap-3 px-6 py-8 text-sm text-slate-400 lg:px-16">
-        <p>Arc Testnet only. USDC for gas. Contract 0xCB8E…2dF8.</p>
-        <a id="docs" href="https://explorer.testnet.arc.io/address/0xCB8E9E75E2F969d2C6F9a1bb651d97C34D3B2dF8" className="text-indigo-500">
+        <p>Arc Testnet only. USDC for gas. Contract {shortAddress(ARC.contract)}.</p>
+        <a id="docs" href={`${ARC.explorer}/address/${ARC.contract}`} className="text-indigo-500">
           Explorer ↗
         </a>
       </footer>

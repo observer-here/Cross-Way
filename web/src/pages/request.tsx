@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 
+import { waitInvoiceId } from "@/chain/read";
 import { useArcWallet } from "@/chain/wallet";
 import { createPaymentRequest } from "@/chain/write";
 import { Field, Input, Select, Submit } from "@/shared/ui/field";
@@ -20,7 +21,9 @@ export function RequestPage() {
         String(fd.get("token") ?? "USDC"),
         String(fd.get("memo") ?? ""),
       );
-      setStatus(`Created. Tx ${hash.slice(0, 10)}…`);
+      setStatus("Indexing…");
+      const id = await waitInvoiceId(hash);
+      setStatus(id ? `Pay link: ${window.location.origin}/pay/${id}` : `Created. Tx ${hash.slice(0, 10)}…`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "failed");
     }

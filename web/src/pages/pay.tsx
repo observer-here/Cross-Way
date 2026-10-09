@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useSession } from "@/auth/session";
 import { ARC } from "@/chain/arc";
 import { loadInvoice } from "@/chain/read";
-import { payInvoice } from "@/chain/write";
+import { cancelInvoice, payInvoice } from "@/chain/write";
 import { useArcWallet } from "@/chain/wallet";
 import { shortAddress } from "@/lib/format";
 import { Submit } from "@/shared/ui/field";
@@ -37,6 +37,7 @@ function Receive({ wallet }: { wallet?: string }) {
 }
 
 function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useArcWallet> }) {
+  const { wallet } = useSession();
   const [inv, setInv] = useState<Awaited<ReturnType<typeof loadInvoice>>>(null);
   const [status, setStatus] = useState("");
 
@@ -54,6 +55,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
     setStatus("Paying…");
     try {
       await payInvoice(signer, id, invoice.tokenAddress, invoice.rawAmount);
+      setInv({ ...invoice, closed: true });
       setStatus("Paid.");
     } catch (e) {
       setStatus(e instanceof Error ? e.message : "failed");
@@ -82,10 +84,28 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
           </div>
         </dl>
         {!invoice.closed && (
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col gap-3">
             <Submit type="button" onClick={pay} disabled={!signer.address}>
               Pay →
             </Submit>
+            {wallet && wallet.toLowerCase() === invoice.payee.toLowerCase() && (
+              <button
+                type="button"
+                className="text-sm text-slate-400"
+                onClick={async () => {
+                  setStatus("Cancelling…");
+                  try {
+                    await cancelInvoice(signer, id);
+                    setStatus("Cancelled.");
+                    setInv({ ...invoice, closed: true });
+                  } catch (e) {
+                    setStatus(e instanceof Error ? e.message : "failed");
+                  }
+                }}
+              >
+                Cancel invoice
+              </button>
+            )}
           </div>
         )}
         {status && <p className="mt-4 text-sm text-slate-500">{status}</p>}

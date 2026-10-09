@@ -19,7 +19,7 @@ contract CrossWay {
     uint256 public nextInvoiceId;
     uint256 private locked = 1;
 
-    mapping(address => bool) public tokenAllowed;
+    mapping(address => bool) public extraToken;
     mapping(bytes32 => address) public walletOf;
     mapping(address => mapping(bytes32 => bytes32)) public identityOf;
     mapping(uint256 => Pending) public pendings;
@@ -33,7 +33,6 @@ contract CrossWay {
         bytes32 key;
         uint64 expiresAt;
         uint32 index;
-        bool closed;
     }
 
     struct Invoice {
@@ -43,44 +42,14 @@ contract CrossWay {
         address token;
         uint256 amount;
         uint64 expiresAt;
-        uint8 kind;
-        bool closed;
     }
 
-    event TokenAllowed(address indexed token, bool allowed);
     event IdentitySet(address indexed wallet, bytes32 indexed kind, bytes32 key);
     event IdentityCleared(address indexed wallet, bytes32 indexed kind, bytes32 key);
-    event Paid(
-        address indexed from,
-        address indexed to,
-        address indexed token,
-        uint256 amount,
-        bytes32 key,
-        uint8 method,
-        uint256 refId,
-        bytes memo
-    );
-    event PendingCreated(
-        uint256 indexed id,
-        address indexed from,
-        bytes32 indexed key,
-        address token,
-        uint256 amount,
-        uint64 expiresAt,
-        bytes memo
-    );
+    event Paid(address indexed from, address indexed to, address indexed token, uint256 amount, bytes32 key, uint8 method, uint256 refId, bytes memo);
+    event PendingCreated(uint256 indexed id, address indexed from, bytes32 indexed key, address token, uint256 amount, uint64 expiresAt, bytes memo);
     event PendingRefunded(uint256 indexed id);
-    event InvoiceCreated(
-        uint256 indexed id,
-        address indexed payee,
-        address indexed payer,
-        bytes32 payerKey,
-        address token,
-        uint256 amount,
-        uint64 expiresAt,
-        uint8 kind,
-        bytes memo
-    );
+    event InvoiceCreated(uint256 indexed id, address indexed payee, address indexed payer, bytes32 payerKey, address token, uint256 amount, uint64 expiresAt, bytes memo);
     event InvoiceCancelled(uint256 indexed id);
 
     error NotOwner();
@@ -113,8 +82,6 @@ contract CrossWay {
 
     constructor() {
         owner = msg.sender;
-        tokenAllowed[USDC] = true;
-        tokenAllowed[EURC] = true;
     }
 
     receive() external payable {
@@ -127,9 +94,8 @@ contract CrossWay {
     }
 
     function setToken(address token, bool allowed) external onlyOwner {
-        if (token == address(0)) revert ZeroAddress();
-        tokenAllowed[token] = allowed;
-        emit TokenAllowed(token, allowed);
+        if (token == address(0) || token == USDC || token == EURC) revert ZeroAddress();
+        extraToken[token] = allowed;
     }
 
     function keyOf(bytes32 kind, string calldata value) public pure returns (bytes32) {
@@ -193,20 +159,14 @@ contract CrossWay {
         _move(token, msg.sender, address(this), amount);
         uint256 id = ++nextPendingId;
         uint256[] storage list = pendingIds[key];
-        pendings[id] = Pending(msg.sender, token, amount, key, expiresAt, uint32(list.length), false);
+        pendings[id] = Pending(msg.sender, token, amount, key, expiresAt, uint32(list.length));
         list.push(id);
         emit PendingCreated(id, msg.sender, key, token, amount, expiresAt, memo);
     }
 
-    function createRequest(
-        address payer,
-        address token,
-        uint256 amount,
-        uint64 expiresAt,
-        bytes calldata memo
-    ) external returns (uint256) {
+    function createRequest(address payer, address token, uint256 amount, uint64 expiresAt, bytes calldata memo) external returns (uint256) {
         if (payer == address(0)) revert ZeroAddress();
-        return _invoice(payer, bytes32(0), token, amount, expiresAt, 0, memo);
+        return _invoice(payer, bytes32(0), token, amount, expiresAt, memo);
     }
 
     function createRequestTo(
@@ -217,47 +177,52 @@ contract CrossWay {
         uint64 expiresAt,
         bytes calldata memo
     ) external returns (uint256) {
-        return _invoice(address(0), keyOf(kind, value), token, amount, expiresAt, 0, memo);
+        return _invoice(address(0), keyOf(kind, value), token, amount, expiresAt, memo);
     }
 
     function createLink(address token, uint256 amount, uint64 expiresAt, bytes calldata memo) external returns (uint256) {
-        return _invoice(address(0), bytes32(0), token, amount, expiresAt, 1, memo);
+        return _invoice(address(0), bytes32(0), token, amount, expiresAt, memo);
     }
 
     function pay(uint256 id, bytes calldata memo) external nonReentrant {
-        Invoice storage inv = invoices[id];
-        if (inv.closed) revert Closed();
+        Invoice memory inv = invoices[id];
+        if (inv.payee == address(0)) revert Closed();
         if (block.timestamp > inv.expiresAt) revert NotDue();
         if (inv.payer != address(0) && inv.payer != msg.sender) revert NotPayer();
         if (inv.payerKey != bytes32(0) && walletOf[inv.payerKey] != msg.sender) revert NotPayer();
-        inv.closed = true;
-        _pay(msg.sender, inv.payee, inv.token, inv.amount, inv.payerKey, inv.kind == 1 ? 2 : 1, id, memo);
+        uint8 method = inv.payer == address(0) && inv.payerKey == bytes32(0) ? 2 : 1;
+        delete invoices[id];
+        _pay(msg.sender, inv.payee, inv.token, inv.amount, inv.payerKey, method, id, memo);
     }
 
     function cancel(uint256 id) external {
         Invoice storage inv = invoices[id];
-        if (inv.closed) revert Closed();
+        if (inv.payee == address(0)) revert Closed();
         if (inv.payee != msg.sender) revert NotSender();
-        inv.closed = true;
+        delete invoices[id];
         emit InvoiceCancelled(id);
     }
 
     function claim(uint256 id) external nonReentrant {
         Pending storage p = pendings[id];
-        if (p.closed) revert Closed();
+        if (p.from == address(0)) revert Closed();
         if (walletOf[p.key] != msg.sender) revert NotBound();
         _release(id, msg.sender);
     }
 
     function refund(uint256 id) external nonReentrant {
         Pending storage p = pendings[id];
-        if (p.closed) revert Closed();
+        if (p.from == address(0)) revert Closed();
         if (p.from != msg.sender) revert NotSender();
         if (block.timestamp < p.expiresAt) revert NotDue();
-        p.closed = true;
         _detach(p);
         _move(p.token, address(this), p.from, p.amount);
+        delete pendings[id];
         emit PendingRefunded(id);
+    }
+
+    function _ok(address token) internal view returns (bool) {
+        return token == USDC || token == EURC || extraToken[token];
     }
 
     function _invoice(
@@ -266,21 +231,24 @@ contract CrossWay {
         address token,
         uint256 amount,
         uint64 expiresAt,
-        uint8 kind,
         bytes calldata memo
     ) internal returns (uint256 id) {
         _check(token, amount, expiresAt);
         id = ++nextInvoiceId;
-        invoices[id] = Invoice(msg.sender, payer, payerKey, token, amount, expiresAt, kind, false);
-        emit InvoiceCreated(id, msg.sender, payer, payerKey, token, amount, expiresAt, kind, memo);
+        invoices[id] = Invoice(msg.sender, payer, payerKey, token, amount, expiresAt);
+        emit InvoiceCreated(id, msg.sender, payer, payerKey, token, amount, expiresAt, memo);
     }
 
     function _release(uint256 id, address to) internal {
         Pending storage p = pendings[id];
-        p.closed = true;
+        address from = p.from;
+        address token = p.token;
+        uint256 amount = p.amount;
+        bytes32 key = p.key;
         _detach(p);
-        _move(p.token, address(this), to, p.amount);
-        emit Paid(p.from, to, p.token, p.amount, p.key, 3, id, "");
+        delete pendings[id];
+        _move(token, address(this), to, amount);
+        emit Paid(from, to, token, amount, key, 3, id, "");
     }
 
     function _detach(Pending storage p) internal {
@@ -305,21 +273,19 @@ contract CrossWay {
         bytes memory memo
     ) internal {
         if (amount == 0) revert ZeroAmount();
-        if (!tokenAllowed[token]) revert TokenNotAllowed();
+        if (!_ok(token)) revert TokenNotAllowed();
         _move(token, from, to, amount);
         emit Paid(from, to, token, amount, key, method, refId, memo);
     }
 
     function _move(address token, address from, address to, uint256 amount) internal {
-        bool ok = from == address(this)
-            ? IERC20(token).transfer(to, amount)
-            : IERC20(token).transferFrom(from, to, amount);
+        bool ok = from == address(this) ? IERC20(token).transfer(to, amount) : IERC20(token).transferFrom(from, to, amount);
         if (!ok) revert TransferFailed();
     }
 
     function _check(address token, uint256 amount, uint64 expiresAt) internal view {
         if (amount == 0) revert ZeroAmount();
-        if (!tokenAllowed[token]) revert TokenNotAllowed();
+        if (!_ok(token)) revert TokenNotAllowed();
         if (expiresAt <= block.timestamp || expiresAt > block.timestamp + MAX_EXPIRY) revert BadExpiry();
     }
 }

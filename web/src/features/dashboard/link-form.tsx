@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 
+import { waitInvoiceId } from "@/chain/read";
 import { useArcWallet } from "@/chain/wallet";
 import { createPaymentLink } from "@/chain/write";
 import { Input, Select, Submit } from "@/shared/ui/field";
@@ -17,7 +18,9 @@ export function LinkForm() {
     setStatus("Creating…");
     try {
       const hash = await createPaymentLink(wallet, amount, symbol, memo);
-      setStatus(`Created. Tx ${hash.slice(0, 10)}…`);
+      setStatus("Indexing…");
+      const id = await waitInvoiceId(hash);
+      setStatus(id ? `${window.location.origin}/pay/${id}` : `Created. Tx ${hash.slice(0, 10)}…`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "failed");
     }

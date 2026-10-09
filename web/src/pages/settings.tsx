@@ -4,24 +4,28 @@ import { useState, type FormEvent } from "react";
 import { updateMe } from "@/api/users";
 import { useSession } from "@/auth/session";
 import { ARC } from "@/chain/arc";
+import { useArcWallet } from "@/chain/wallet";
+import { syncIdentities } from "@/chain/write";
 import { Field, Input, Submit } from "@/shared/ui/field";
 
 export function SettingsPage() {
   const { getAccessToken, user, logout } = usePrivy();
   const { me, wallet } = useSession();
+  const signer = useArcWallet();
   const [status, setStatus] = useState("");
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const username = String(fd.get("username") || "") || undefined;
+    const userId = String(fd.get("userId") || "") || undefined;
     setStatus("Saving…");
     try {
       const token = await getAccessToken();
       if (!token) throw new Error("not signed in");
-      await updateMe(token, {
-        username: String(fd.get("username") || "") || undefined,
-        userId: String(fd.get("userId") || "") || undefined,
-      });
+      await updateMe(token, { username, userId });
+      setStatus("Registering on-chain…");
+      await syncIdentities(signer, { email: me?.email, username, user_id: userId });
       setStatus("Saved.");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "failed");

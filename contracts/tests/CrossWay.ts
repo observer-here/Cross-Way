@@ -36,6 +36,7 @@ describe("CrossWay", function () {
     expect(await token.balanceOf(await pay.getAddress())).to.equal(7_000_000);
     await pay.connect(bob).register(await pay.EMAIL(), "bob@example.com");
     expect(await token.balanceOf(bob.address)).to.equal(1_007_000_000);
+    expect((await pay.pendings(1)).from).to.equal(ethers.ZeroAddress);
   });
 
   it("refunds after expiry", async function () {
@@ -45,6 +46,7 @@ describe("CrossWay", function () {
     await time.increaseTo(exp);
     await pay.connect(alice).refund(1);
     expect(await token.balanceOf(alice.address)).to.equal(1_000_000_000);
+    expect((await pay.pendings(1)).from).to.equal(ethers.ZeroAddress);
   });
 
   it("requests, links, redeems, and cancels", async function () {
@@ -63,5 +65,7 @@ describe("CrossWay", function () {
     await pay.connect(bob).cancel(4);
     await expect(pay.connect(alice).pay(4, "0x")).to.be.revertedWithCustomError(pay, "Closed");
     expect(await token.balanceOf(bob.address)).to.equal(1_011_000_000);
+    expect((await pay.invoices(1)).payee).to.equal(ethers.ZeroAddress);
+    expect((await pay.invoices(4)).payee).to.equal(ethers.ZeroAddress);
   });
 });

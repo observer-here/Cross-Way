@@ -7,7 +7,7 @@ export const ARC = {
   explorer: "https://explorer.testnet.arc.io",
   usdc: "0x3600000000000000000000000000000000000000" as const,
   eurc: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a" as const,
-  contract: "0xCB8E9E75E2F969d2C6F9a1bb651d97C34D3B2dF8" as const,
+  contract: "0x069a2C2eD093308233e449409B1547F2a55060c7" as const,
 };
 
 export const arcChain = defineChain({
@@ -22,6 +22,12 @@ export const KIND = {
   USERNAME: keccak256(stringToHex("username")),
   EMAIL: keccak256(stringToHex("email")),
   USER_ID: keccak256(stringToHex("userid")),
+} as const;
+
+export const TOPICS = {
+  INVOICE_CREATED: keccak256(stringToHex("InvoiceCreated(uint256,address,address,bytes32,address,uint256,uint64,bytes)")),
+  INVOICE_CANCELLED: keccak256(stringToHex("InvoiceCancelled(uint256)")),
+  PAID: keccak256(stringToHex("Paid(address,address,address,uint256,bytes32,uint8,uint256,bytes)")),
 } as const;
 
 export const TOKENS = {

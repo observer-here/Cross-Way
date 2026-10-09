@@ -1,6 +1,16 @@
 export const crossWayAbi = [
   {
     type: "function",
+    name: "register",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "kind", type: "bytes32" },
+      { name: "value", type: "string" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
     name: "sendToAddress",
     stateMutability: "nonpayable",
     inputs: [
@@ -76,19 +86,10 @@ export const crossWayAbi = [
   },
   {
     type: "function",
-    name: "invoices",
-    stateMutability: "view",
+    name: "cancel",
+    stateMutability: "nonpayable",
     inputs: [{ name: "id", type: "uint256" }],
-    outputs: [
-      { name: "payee", type: "address" },
-      { name: "payer", type: "address" },
-      { name: "payerKey", type: "bytes32" },
-      { name: "token", type: "address" },
-      { name: "amount", type: "uint256" },
-      { name: "expiresAt", type: "uint64" },
-      { name: "kind", type: "uint8" },
-      { name: "closed", type: "bool" },
-    ],
+    outputs: [],
   },
   {
     type: "event",
@@ -101,6 +102,20 @@ export const crossWayAbi = [
       { name: "key", type: "bytes32", indexed: false },
       { name: "method", type: "uint8", indexed: false },
       { name: "refId", type: "uint256", indexed: false },
+      { name: "memo", type: "bytes", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "InvoiceCreated",
+    inputs: [
+      { name: "id", type: "uint256", indexed: true },
+      { name: "payee", type: "address", indexed: true },
+      { name: "payer", type: "address", indexed: true },
+      { name: "payerKey", type: "bytes32", indexed: false },
+      { name: "token", type: "address", indexed: false },
+      { name: "amount", type: "uint256", indexed: false },
+      { name: "expiresAt", type: "uint64", indexed: false },
       { name: "memo", type: "bytes", indexed: false },
     ],
   },

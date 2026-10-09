@@ -1,6 +1,5 @@
-import { erc20Abi, isAddress, toHex, type Address, type WalletClient } from "viem";
+import { erc20Abi, isAddress, toHex, type Address, type Hex, type WalletClient } from "viem";
 
-import { lookup } from "@/api/users";
 import { toTokenAmount } from "@/lib/format";
 
 import { crossWayAbi } from "./abi";
@@ -35,6 +34,10 @@ function sender(wallet: ArcWallet, client: WalletClient) {
   return { account, chain: client.chain };
 }
 
+function skipKey(wallet: string, kind: Hex, value: string) {
+  return `cw:id:${wallet.toLowerCase()}:${kind}:${value.trim().toLowerCase()}`;
+}
+
 async function approve(wallet: ArcWallet, token: Address, amount: bigint) {
   const client = await wallet.client();
   await client.writeContract({
@@ -47,106 +50,76 @@ async function approve(wallet: ArcWallet, token: Address, amount: bigint) {
   });
 }
 
+async function exec(wallet: ArcWallet, functionName: "register" | "sendToAddress" | "sendTo" | "createRequest" | "createRequestTo" | "createLink" | "pay" | "cancel", args: readonly unknown[]) {
+  const client = await wallet.client();
+  return client.writeContract({
+    address: ARC.contract,
+    abi: crossWayAbi,
+    functionName,
+    args: args as never,
+    ...sender(wallet, client),
+    ...GAS,
+  });
+}
+
+export async function registerIdentity(wallet: ArcWallet, kind: Hex, value: string) {
+  const v = value.trim();
+  if (!v || !wallet.address) return;
+  const key = skipKey(wallet.address, kind, v);
+  if (localStorage.getItem(key)) return;
+  try {
+    await exec(wallet, "register", [kind, v]);
+    localStorage.setItem(key, "1");
+  } catch (e) {
+    if (/Taken/i.test(String(e))) localStorage.setItem(key, "1");
+    else throw e;
+  }
+}
+
+export async function syncIdentities(
+  wallet: ArcWallet,
+  profile: { email?: string | null; username?: string | null; user_id?: string | null },
+) {
+  if (profile.email) await registerIdentity(wallet, KIND.EMAIL, profile.email);
+  if (profile.username) await registerIdentity(wallet, KIND.USERNAME, profile.username);
+  if (profile.user_id) await registerIdentity(wallet, KIND.USER_ID, profile.user_id);
+}
+
 export async function sendPayment(wallet: ArcWallet, to: string, amount: string, symbol: string, memo: string) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
   await approve(wallet, token.address, value);
-  const client = await wallet.client();
-  const from = sender(wallet, client);
   if (isAddress(to)) {
-    await client.writeContract({
-      address: ARC.contract,
-      abi: crossWayAbi,
-      functionName: "sendToAddress",
-      args: [to, token.address, value, memoBytes(memo)],
-      ...from,
-      ...GAS,
-    });
-    return;
-  }
-  const found = await lookup(to.includes("@") ? { email: to } : { username: to.toLowerCase() }).catch(() =>
-    lookup({ userId: to }).catch(() => null),
-  );
-  if (found?.wallet && isAddress(found.wallet)) {
-    await client.writeContract({
-      address: ARC.contract,
-      abi: crossWayAbi,
-      functionName: "sendToAddress",
-      args: [found.wallet, token.address, value, memoBytes(memo)],
-      ...from,
-      ...GAS,
-    });
+    await exec(wallet, "sendToAddress", [to, token.address, value, memoBytes(memo)]);
     return;
   }
   const id = kindOf(to);
-  await client.writeContract({
-    address: ARC.contract,
-    abi: crossWayAbi,
-    functionName: "sendTo",
-    args: [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)],
-    ...from,
-    ...GAS,
-  });
+  await exec(wallet, "sendTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
 }
 
 export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
-  const client = await wallet.client();
-  const auth = sender(wallet, client);
   if (!from.trim()) {
-    return client.writeContract({
-      address: ARC.contract,
-      abi: crossWayAbi,
-      functionName: "createLink",
-      args: [token.address, value, expiry(), memoBytes(memo)],
-      ...auth,
-      ...GAS,
-    });
+    return exec(wallet, "createLink", [token.address, value, expiry(), memoBytes(memo)]);
   }
   if (isAddress(from)) {
-    return client.writeContract({
-      address: ARC.contract,
-      abi: crossWayAbi,
-      functionName: "createRequest",
-      args: [from, token.address, value, expiry(), memoBytes(memo)],
-      ...auth,
-      ...GAS,
-    });
+    return exec(wallet, "createRequest", [from, token.address, value, expiry(), memoBytes(memo)]);
   }
   const id = kindOf(from);
-  return client.writeContract({
-    address: ARC.contract,
-    abi: crossWayAbi,
-    functionName: "createRequestTo",
-    args: [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)],
-    ...auth,
-    ...GAS,
-  });
+  return exec(wallet, "createRequestTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
 }
 
 export async function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, days = 7) {
   const token = tokenOf(symbol);
-  const client = await wallet.client();
-  return client.writeContract({
-    address: ARC.contract,
-    abi: crossWayAbi,
-    functionName: "createLink",
-    args: [token.address, toTokenAmount(amount, token.decimals), expiry(days), memoBytes(memo)],
-    ...sender(wallet, client),
-    ...GAS,
-  });
+  return exec(wallet, "createLink", [token.address, toTokenAmount(amount, token.decimals), expiry(days), memoBytes(memo)]);
 }
 
 export async function payInvoice(wallet: ArcWallet, id: bigint, token: Address, amount: bigint) {
   await approve(wallet, token, amount);
-  const client = await wallet.client();
-  await client.writeContract({
-    address: ARC.contract,
-    abi: crossWayAbi,
-    functionName: "pay",
-    args: [id, "0x"],
-    ...sender(wallet, client),
-    ...GAS,
-  });
+  await exec(wallet, "pay", [id, "0x"]);
+}
+
+export async function cancelInvoice(wallet: ArcWallet, id: bigint) {
+  await exec(wallet, "cancel", [id]);
 }
