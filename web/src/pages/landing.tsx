@@ -43,7 +43,7 @@ export function LandingPage() {
         <div className="max-w-xl">
           <p className="text-[11px] tracking-[0.32em] text-slate-400">PAYMENTS ON ARC</p>
           <h1 className="mt-4 text-5xl leading-[1.05] font-extrabold tracking-tight md:text-6xl">
-            Send. Receive.
+            Send. Request.
             <br />
             <span className="bg-linear-to-r from-blue-600 to-violet-500 bg-clip-text text-transparent">Anyone. Anywhere.</span>
           </h1>
