@@ -1,0 +1,19 @@
+{
+  "name": "crossway-backend",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 execute crossway --local --file=migrations/0001_users.sql",
+    "db:remote": "wrangler d1 execute crossway --remote --file=migrations/0001_users.sql"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "jose": "^5.9.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.40.0"
+  }
+}
