@@ -1,11 +1,11 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
 
 const control =
-  "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-violet-400/60";
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-indigo-300";
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5 text-xs text-white/50">
+    <label className="flex flex-col gap-1.5 text-xs text-slate-400">
       {label}
       {children}
     </label>
@@ -22,11 +22,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 
 export function Submit({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      type="submit"
-      {...props}
-      className="w-full rounded-xl bg-linear-to-r from-indigo-500 to-violet-500 py-3 text-sm font-semibold text-white disabled:opacity-40"
-    >
+    <button type="submit" {...props} className="w-full rounded-full bg-slate-950 py-3 text-sm font-medium text-white disabled:opacity-40">
       {children}
     </button>
   );
