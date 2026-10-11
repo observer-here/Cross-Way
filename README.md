@@ -6,8 +6,7 @@
 
 **⚡ Send. Receive. Anyone. Anywhere. 🌍**
 
-A stablecoin payments app on [Arc](https://docs.arc.io) 💸
-Sign in with an email, get a wallet automatically, and pay anyone by username, email, EVM address or user ID, in USDC or EURC.
+**CROSS WAY** is a payment application built on [Arc](https://docs.arc.io) that makes sending and requesting crypto payments simple. Users can transfer stable tokens using a username, email address, user ID, or EVM wallet address instead of relying solely on long wallet addresses. 💸
 
 ![Network](https://img.shields.io/badge/Network-Arc%20Mainnet-4f46e5?style=for-the-badge&logo=ethereum&logoColor=white)
 ![Chain ID](https://img.shields.io/badge/Chain%20ID-5042-7c3aed?style=for-the-badge)
