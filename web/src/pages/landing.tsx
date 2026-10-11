@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ARC } from "@/chain/arc";
 import { shortAddress } from "@/lib/format";
 import { Logo } from "@/shared/ui/logo";
+import { ThemeToggle } from "@/theme";
 
 const nav = [
   { href: "#home", label: "Home" },
@@ -15,7 +16,7 @@ const nav = [
 
 export function LandingPage() {
   return (
-    <div id="home" className="landing-sky min-h-screen text-slate-800">
+    <div id="home" className="min-h-screen text-slate-800">
       <header className="flex items-center gap-4 px-5 py-5 lg:px-10">
         <Logo />
         <nav className="hidden min-w-0 flex-1 items-center justify-center gap-5 text-sm whitespace-nowrap text-slate-500 md:flex">
@@ -30,6 +31,7 @@ export function LandingPage() {
           ))}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-3">
+          <ThemeToggle />
           <span className="hidden items-center gap-2 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-sm whitespace-nowrap text-slate-600 sm:flex">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             Arc Testnet
@@ -132,9 +134,7 @@ function HeroVisual() {
     <div className="relative mx-auto h-[380px] w-full max-w-[520px]">
       <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50" />
       <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30" />
-      <div className="glass-x absolute top-1/2 left-1/2 grid h-44 w-44 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2rem]">
-            <span className="rotate-[18deg] bg-linear-to-br from-indigo-600 to-violet-500 bg-clip-text text-7xl font-black text-transparent drop-shadow">X</span>
-      </div>
+      <img src="/logo.png" alt="" className="absolute top-1/2 left-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 object-contain" />
       <Chip className="top-8 left-8" icon={<UserIcon />} text="@alice" />
       <Chip className="top-24 right-4" icon={<MailIcon />} text="alice@email.com" />
       <Chip className="bottom-24 left-2" icon={<WalletIcon />} text="0x3aF2...7dE1" />

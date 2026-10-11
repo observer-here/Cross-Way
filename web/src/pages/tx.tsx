@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useSession } from "@/auth/session";
 import { ARC } from "@/chain/arc";
 import { loadTx, type ActivityItem } from "@/chain/read";
-import { personLabel, shortAddress } from "@/lib/format";
+import { personLabel, shortAddress, shortTime } from "@/lib/format";
 
 export function TxPage() {
   const { hash } = useParams();
@@ -37,7 +37,7 @@ export function TxPage() {
         <p className="mt-1 text-sm text-slate-400">{tx.dir === "out" ? `Sent to ${personLabel(tx.counterparty)}` : `Received from ${personLabel(tx.counterparty)}`}</p>
         <dl className="mt-8 space-y-4 text-sm">
           <Row label="Status" value="Completed" />
-          <Row label="Date" value={tx.time} />
+          <Row label="Date" value={shortTime(tx.ts)} />
           <Row label="From" value={shortAddress(tx.from)} />
           <Row label="To" value={shortAddress(tx.to)} />
           <Row label="Network" value="Arc Testnet" />

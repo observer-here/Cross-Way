@@ -29,5 +29,4 @@ export type LookupQuery = {
 
 export type ProfilePatch = {
   username?: string;
-  userId?: string;
 };

@@ -3,9 +3,9 @@ import { useState, type FormEvent } from "react";
 import { waitInvoiceId } from "@/chain/read";
 import { useArcWallet } from "@/chain/wallet";
 import { createPaymentLink } from "@/chain/write";
-import { todayPlus } from "@/lib/format";
 import { DaysSelect, Field, Glow, Input, Textarea, TokenSelect } from "@/shared/ui/field";
-import { qrSrc, SideMark, SoftIcon } from "@/shared/ui/mark";
+import { SideMark, SoftIcon } from "@/shared/ui/mark";
+import { QrCode } from "@/shared/ui/qr";
 
 export function LinksPage() {
   const wallet = useArcWallet();
@@ -21,7 +21,7 @@ export function LinksPage() {
     e.preventDefault();
     setStatus("Creating…");
     try {
-      const hash = await createPaymentLink(wallet, amount, token, memo, todayPlus(Number(days)));
+      const hash = await createPaymentLink(wallet, amount, token, memo, Number(days));
       setStatus("Indexing…");
       const id = await waitInvoiceId(hash);
       const url = id ? `${window.location.origin}/pay/${id}` : "";
@@ -88,12 +88,20 @@ export function LinksPage() {
                 <dd className="mt-1">{days} days</dd>
               </div>
             </dl>
-            <button type="button" onClick={() => setDone(false)} className="mt-8 text-sm text-slate-400">
+            <button
+              type="button"
+              onClick={() => {
+                setDone(false);
+                setLink("");
+                setStatus("");
+              }}
+              className="mt-8 text-sm text-slate-400"
+            >
               Create another
             </button>
           </div>
           <div className="panel flex flex-col items-center p-4 lg:p-6">
-            <img src={qrSrc(link)} alt="Payment QR" className="h-44 w-44 rounded-xl bg-white p-2" />
+            <QrCode value={link} size={176} className="p-2" />
             <p className="mt-4 text-sm font-medium">Scan to Pay</p>
           </div>
         </div>
@@ -116,7 +124,7 @@ export function LinksPage() {
         <div className="mt-3 grid items-start gap-3 lg:mt-6 lg:gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         <form className="panel flex flex-col gap-3 p-4 lg:gap-5 lg:p-8" onSubmit={onSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Amount (optional)">
+            <Field label="Amount">
               <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" required />
             </Field>
             <Field label="Token">
@@ -135,12 +143,8 @@ export function LinksPage() {
         </form>
       <aside className="panel flex flex-col items-center p-3.5 lg:p-6">
         <p className="self-start text-sm font-semibold">Preview</p>
-        <img src={qrSrc(link || "crossway")} alt="" className="mt-6 h-40 w-40 rounded-xl bg-white p-2" />
+        <QrCode value={link} size={160} className="mt-6 p-2" />
         <p className="mt-4 max-w-full truncate text-xs text-slate-400">{link || "Preview after you generate"}</p>
-        <div className="mt-6 flex gap-2">
-          <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs text-slate-400">Scan QR</span>
-          <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs text-slate-400">Share</span>
-        </div>
       </aside>
         </div>
       </section>

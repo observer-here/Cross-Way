@@ -5,40 +5,9 @@
   --font-script: "Caveat", cursive;
 }
 
-html {
-  min-height: 100%;
-  background: #eef2ff;
-}
-
-body,
-#root {
-  min-height: 100%;
-}
-
 body {
-  margin: 0;
   color: #16182b;
   font-family: var(--font-sans);
-  background: transparent;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(90% 55% at 8% -8%, rgb(167 139 250 / 0.5), transparent 58%),
-    radial-gradient(70% 48% at 100% 0%, rgb(56 189 248 / 0.32), transparent 54%),
-    radial-gradient(55% 40% at 85% 100%, rgb(196 181 253 / 0.38), transparent 58%),
-    radial-gradient(45% 32% at 0% 90%, rgb(125 211 252 / 0.22), transparent 52%),
-    linear-gradient(180deg, #f4f1ff 0%, #eef2ff 46%, #f7f8fc 100%);
-}
-
-#root {
-  position: relative;
-  z-index: 1;
 }
 
 input,
@@ -86,19 +55,116 @@ textarea {
   }
 }
 
-.glass-x {
-  background: linear-gradient(145deg, rgb(255 255 255 / 0.72), rgb(196 181 253 / 0.28));
-  border: 1px solid rgb(255 255 255 / 0.8);
-  box-shadow:
-    0 30px 70px rgb(99 102 241 / 0.22),
-    inset 0 1px 0 rgb(255 255 255 / 0.8);
-  backdrop-filter: blur(18px);
-  transform: rotate(-18deg);
-}
-
 .chip {
   background: rgb(255 255 255 / 0.78);
   border: 1px solid rgb(255 255 255 / 0.95);
   box-shadow: 0 12px 30px rgb(80 70 160 / 0.12);
   backdrop-filter: blur(10px);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+html.dark body {
+  color: #e8eaf8;
+}
+
+.skel {
+  display: block;
+  background: rgb(15 23 42 / 0.08);
+  animation: skel 1.2s ease-in-out infinite;
+}
+html.dark .skel {
+  background: rgb(255 255 255 / 0.08);
+}
+@keyframes skel {
+  50% {
+    opacity: 0.4;
+  }
+}
+html.dark .panel {
+  background: rgb(18 20 36 / 0.86);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.28);
+}
+html.dark .dash-card {
+  background: #141628;
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.28);
+}
+html.dark .chip {
+  background: rgb(20 22 38 / 0.8);
+  border-color: rgb(255 255 255 / 0.1);
+}
+html.dark .bg-white {
+  background-color: rgb(20 22 38 / 0.92);
+}
+html.dark .bg-white\/60 {
+  background-color: rgb(20 22 38 / 0.6);
+}
+html.dark .bg-white\/70 {
+  background-color: rgb(20 22 38 / 0.7);
+}
+html.dark .bg-white\/80 {
+  background-color: rgb(20 22 38 / 0.8);
+}
+html.dark .bg-white\/90 {
+  background-color: rgb(20 22 38 / 0.9);
+}
+html.dark .bg-slate-50 {
+  background-color: #1c1e32;
+}
+html.dark .bg-slate-100 {
+  background-color: #22243a;
+}
+html.dark .text-slate-950,
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f0f2fc;
+}
+html.dark .text-slate-700 {
+  color: #d8dbea;
+}
+html.dark .text-slate-600 {
+  color: #b4bad0;
+}
+html.dark .text-slate-500 {
+  color: #8f97b3;
+}
+html.dark .text-slate-400 {
+  color: #7a829c;
+}
+html.dark .text-slate-300 {
+  color: #9aa3be;
+}
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(255 255 255 / 0.08);
+}
+html.dark .border-white\/70,
+html.dark .border-white\/50,
+html.dark .border-white\/30 {
+  border-color: rgb(255 255 255 / 0.1);
+}
+html.dark .bg-indigo-50 {
+  background-color: rgb(99 102 241 / 0.18);
+}
+html.dark .bg-fuchsia-50 {
+  background-color: rgb(217 70 239 / 0.16);
+}
+html.dark .bg-emerald-50 {
+  background-color: rgb(16 185 129 / 0.16);
+}
+html.dark .bg-orange-50 {
+  background-color: rgb(249 115 22 / 0.16);
+}
+html.dark .bg-violet-50 {
+  background-color: rgb(139 92 246 / 0.18);
+}
+html.dark .bg-sky-50 {
+  background-color: rgb(14 165 233 / 0.16);
+}
+html.dark .hover\:text-slate-800:hover {
+  color: #f0f2fc;
 }

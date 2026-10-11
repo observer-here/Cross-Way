@@ -1,11 +1,14 @@
 import { AuthProvider } from "@/auth/provider";
+import { ThemeProvider } from "@/theme";
 
 import { AppRouter } from "./router";
 
 export function App() {
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

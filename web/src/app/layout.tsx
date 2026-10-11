@@ -5,6 +5,7 @@ import { useSession } from "@/auth/session";
 import { labelOf } from "@/lib/format";
 import { Avatar } from "@/shared/ui/avatar";
 import { Logo } from "@/shared/ui/logo";
+import { ThemeToggle } from "@/theme";
 
 const links = [
   { to: "/app", label: "Home", end: true, icon: "M4 10.2 12 3.6l8 6.6V20h-5.2v-5.4H9.2V20H4z" },
@@ -14,11 +15,11 @@ const links = [
 ];
 
 export function Layout() {
-  const { me, wallet } = useSession();
-  const name = labelOf(me?.email, me?.username, wallet);
+  const { me } = useSession();
+  const name = labelOf(me?.username, me?.email);
 
   return (
-    <div className="app-sky min-h-screen text-slate-800">
+    <div className="min-h-screen text-slate-800">
       <header className="relative flex items-center justify-between px-3 py-2.5 lg:px-10 lg:py-5">
         <Logo to="/app" />
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-3 lg:flex">
@@ -37,6 +38,7 @@ export function Layout() {
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <span className="hidden items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm text-slate-600 shadow-sm sm:flex">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             Arc Testnet

@@ -16,7 +16,7 @@ app.use("*", (c, next) =>
   })(c, next),
 );
 
-app.onError((err, c) => {
+app.onError((err) => {
   const status = err instanceof HttpError ? err.status : 500;
   const message = err instanceof HttpError ? err.message : "internal";
   return new Response(JSON.stringify({ error: message }), { status, headers: { "Content-Type": "application/json" } });

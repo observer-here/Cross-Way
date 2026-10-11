@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { RequireAuth } from "@/auth/guard";
-import { ContactsPage } from "@/pages/contacts";
 import { HistoryPage } from "@/pages/history";
 import { HomePage } from "@/pages/home";
 import { LandingPage } from "@/pages/landing";
@@ -30,7 +29,6 @@ export function AppRouter() {
           <Route path="/pay/:id" element={<PayPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/tx/:hash" element={<TxPage />} />
-          <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />

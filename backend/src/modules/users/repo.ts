@@ -26,19 +26,33 @@ export class UsersRepo {
     return row ? map(row) : null;
   }
 
-  create(id: string, email: string, wallet: string, now: number) {
+  async nextUsername() {
+    await this.db.prepare("INSERT OR IGNORE INTO meta (key, value) VALUES ('username_n', 0)").run();
+    const cur = await this.db.prepare("SELECT value FROM meta WHERE key = 'username_n'").first<{ value: number }>();
+    if (!cur?.value) {
+      const max = await this.db.prepare("SELECT MAX(CAST(substr(username, 9) AS INTEGER)) AS m FROM users WHERE username GLOB 'username[0-9]*'").first<{ m: number | null }>();
+      if (max?.m) await this.db.prepare("UPDATE meta SET value = ? WHERE key = 'username_n'").bind(max.m).run();
+    }
+    const row = await this.db.prepare("UPDATE meta SET value = value + 1 WHERE key = 'username_n' RETURNING value").first<{ value: number }>();
+    return `username${row?.value ?? 1}`;
+  }
+
+  create(id: string, email: string, wallet: string, username: string, userId: string, now: number) {
     return this.db
-      .prepare("INSERT INTO users (id, email, username, user_id, wallet, created_at, updated_at) VALUES (?, ?, NULL, NULL, ?, ?, ?)")
-      .bind(id, email, wallet, now, now)
+      .prepare("INSERT INTO users (id, email, username, user_id, wallet, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .bind(id, email, username, userId, wallet, now, now)
       .run();
   }
 
-  saveContact(id: string, email: string, wallet: string, now: number) {
-    return this.db.prepare("UPDATE users SET email = ?, wallet = ?, updated_at = ? WHERE id = ?").bind(email, wallet, now, id).run();
+  fillIdentity(id: string, username: string | null, userId: string | null, now: number) {
+    return this.db
+      .prepare("UPDATE users SET username = COALESCE(username, ?), user_id = COALESCE(user_id, ?), updated_at = ? WHERE id = ?")
+      .bind(username, userId, now, id)
+      .run();
   }
 
-  saveProfile(id: string, username: string | null, userId: string | null, now: number) {
-    return this.db.prepare("UPDATE users SET username = ?, user_id = ?, updated_at = ? WHERE id = ?").bind(username, userId, now, id).run();
+  saveUsername(id: string, username: string, now: number) {
+    return this.db.prepare("UPDATE users SET username = ?, updated_at = ? WHERE id = ?").bind(username, now, id).run();
   }
 
   saveAvatar(id: string, bytes: ArrayBuffer, type: string, now: number) {

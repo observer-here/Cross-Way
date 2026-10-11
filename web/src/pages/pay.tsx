@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { useSession } from "@/auth/session";
 import { loadInvoice } from "@/chain/read";
@@ -12,7 +12,6 @@ import { Submit } from "@/shared/ui/field";
 export function PayPage() {
   const { id } = useParams();
   const signer = useArcWallet();
-  if (id === "scan") return <Navigate to="/scan" replace />;
   if (!id || !/^\d+$/.test(id)) return <p className="page text-sm text-slate-500">Invalid invoice.</p>;
   return <InvoicePay id={BigInt(id)} signer={signer} />;
 }
@@ -32,6 +31,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
   if (!inv) return <p className="page text-sm text-slate-500">{status || "Invoice not found."}</p>;
   const invoice = inv;
   const mine = wallet && wallet.toLowerCase() === invoice.payee.toLowerCase();
+  const expired = !invoice.closed && invoice.expiresAt * 1000 < Date.now();
   const fee = feeParts(invoice.amount);
 
   async function pay() {
@@ -55,7 +55,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
             <Avatar name={invoice.payee} size="lg" />
             <div>
               <p className="font-medium">{personLabel(invoice.payee)}</p>
-              <p className="text-sm text-slate-400">{invoice.closed ? "This invoice is closed" : "is requesting a payment"}</p>
+              <p className="text-sm text-slate-400">{invoice.closed ? "This invoice is closed" : expired ? "This invoice has expired" : "is requesting a payment"}</p>
             </div>
           </div>
           <p className="mt-8 text-4xl font-semibold">
@@ -97,13 +97,13 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
             </div>
             <div className="flex justify-between">
               <dt className="text-slate-400">Status</dt>
-              <dd>{invoice.closed ? "Closed" : "Open"}</dd>
+              <dd>{invoice.closed ? "Closed" : expired ? "Expired" : "Open"}</dd>
             </div>
           </dl>
           {!invoice.closed && (
             <div className="mt-8">
-              <Submit type="button" onClick={pay} disabled={!signer.address}>
-                {signer.address ? "Pay Now →" : "Connect Wallet to Pay"}
+              <Submit type="button" onClick={pay} disabled={!signer.address || expired}>
+                {signer.address ? "Pay Now →" : "Wallet loading…"}
               </Submit>
               {mine && (
                 <button

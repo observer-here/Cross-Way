@@ -5,7 +5,7 @@ import { useSession } from "@/auth/session";
 import { loadMyInvoices, waitInvoiceId, type InvoiceRow } from "@/chain/read";
 import { useArcWallet } from "@/chain/wallet";
 import { createPaymentRequest } from "@/chain/write";
-import { personLabel, todayPlus } from "@/lib/format";
+import { personLabel, shortTime } from "@/lib/format";
 import { DaysSelect, Field, Glow, Input, Textarea, TokenSelect } from "@/shared/ui/field";
 import { SideMark, SoftIcon } from "@/shared/ui/mark";
 
@@ -31,7 +31,7 @@ export function RequestPage() {
     e.preventDefault();
     setStatus("Creating…");
     try {
-      const hash = await createPaymentRequest(signer, from, amount, token, memo, todayPlus(Number(days)));
+      const hash = await createPaymentRequest(signer, from, amount, token, memo, Number(days));
       setStatus("Indexing…");
       const id = await waitInvoiceId(hash);
       setStatus(id ? `Pay link: ${window.location.origin}/pay/${id}` : `Created. Tx ${hash.slice(0, 10)}…`);
@@ -92,7 +92,7 @@ export function RequestPage() {
                   <span className="block truncate text-[11px] text-slate-400">
                     from {row.counterparty && row.counterparty.toLowerCase() !== zeroAddress ? personLabel(row.counterparty) : "anyone"}
                   </span>
-                  <span className="text-[11px] text-slate-400">{row.time}</span>
+                  <span className="text-[11px] text-slate-400">Due {shortTime(row.expiresAt * 1000)}</span>
                 </span>
                 <Status status={row.status} />
               </li>
@@ -107,6 +107,6 @@ export function RequestPage() {
 }
 
 function Status({ status }: { status: InvoiceRow["status"] }) {
-  const tone = status === "Pending" ? "text-orange-400" : status === "Expired" ? "text-rose-400" : "text-emerald-500";
+  const tone = status === "Pending" ? "text-orange-400" : status === "Completed" ? "text-emerald-500" : "text-rose-400";
   return <span className={`text-[11px] ${tone}`}>{status}</span>;
 }

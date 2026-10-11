@@ -24,8 +24,17 @@ export function Balance() {
           <option value="EURC">EURC</option>
         </select>
       </div>
-      {!wallet && <p className="mt-8 text-sm text-slate-400">Waiting for wallet…</p>}
-      {wallet && !data && !err && <p className="mt-8 text-sm text-slate-400">Loading…</p>}
+      {(!wallet || (!data && !err)) && (
+        <>
+          <div className="mt-3 min-h-[96px] lg:mt-4 lg:min-h-[132px]">
+            <span className="skel mt-4 h-12 w-44 rounded-lg lg:h-14 lg:w-56" />
+          </div>
+          <div className="mt-3 flex gap-2 lg:mt-5">
+            <span className="skel h-10 w-24 rounded-xl" />
+            <span className="skel h-10 w-24 rounded-xl" />
+          </div>
+        </>
+      )}
       {err && <p className="mt-8 text-sm text-rose-500">{err}</p>}
       {data && (
         <>
@@ -43,18 +52,11 @@ export function Balance() {
             </svg>
           </div>
           <div className="mt-3 flex gap-2 lg:mt-5 lg:gap-3">
-            <Link to="/scan" className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm lg:rounded-2xl lg:px-4 lg:py-2.5">
+            <Link to="/scan?me=1" className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm lg:rounded-2xl lg:px-4 lg:py-2.5">
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.8">
                 <path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" />
               </svg>
               Deposit
-            </Link>
-            <Link to="/send" className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm lg:rounded-2xl lg:px-4 lg:py-2.5">
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.8">
-                <path d="M7 7h8a3 3 0 0 1 3 3M17 17H9a3 3 0 0 1-3-3" />
-                <path d="m16 4 3 3-3 3M8 20l-3-3 3-3" />
-              </svg>
-              Swap
             </Link>
           </div>
         </>

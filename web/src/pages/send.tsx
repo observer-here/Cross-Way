@@ -7,7 +7,7 @@ import { useBalances } from "@/chain/balances";
 import { useArcWallet } from "@/chain/wallet";
 import { sendPayment } from "@/chain/write";
 import { usePeople, type Person } from "@/features/send/people";
-import { feeParts, personLabel, shortAddress } from "@/lib/format";
+import { feeParts, isAmount, personLabel, shortAddress } from "@/lib/format";
 import { Avatar, PersonChip } from "@/shared/ui/avatar";
 import { Field, Glow, Input, Select, Textarea } from "@/shared/ui/field";
 import { GlassX, SideMark } from "@/shared/ui/mark";
@@ -32,6 +32,8 @@ export function SendPage() {
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!isAmount(amount)) return setStatus("Enter a valid amount");
+    if (bal && Number(amount) > Number(bal)) return setStatus("Insufficient balance");
     setStatus("");
     setStep("review");
   }
@@ -197,7 +199,7 @@ export function SendPage() {
           </div>
           {bal && (
             <p className="text-right text-xs text-slate-400">
-              Balance: {bal} {token}
+              Balance: {Number(bal).toFixed(2)} {token}
             </p>
           )}
           {Number(amount) > 0 && (
@@ -210,6 +212,7 @@ export function SendPage() {
           </Field>
           <p className="text-right text-[11px] text-slate-400">{memo.length}/200</p>
           <Glow disabled={!wallet.address}>{wallet.address ? "Review & Send →" : "Wallet loading…"}</Glow>
+          {status && <p className="text-sm text-rose-500">{status}</p>}
           </form>
           <aside className="panel p-3.5 lg:p-5">
             <p className="text-sm font-semibold">Recent</p>

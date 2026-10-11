@@ -6,13 +6,11 @@ export type ActivityItem = {
   id: string;
   hash: string;
   dir: "in" | "out";
-  kind: string;
   counterparty: string;
   from: string;
   to: string;
   amount: string;
   token: string;
-  time: string;
   ts: number;
 };
 
@@ -20,12 +18,12 @@ export type InvoiceRow = {
   id: string;
   amount: string;
   token: string;
-  status: "Pending" | "Completed" | "Expired";
-  time: string;
+  status: "Pending" | "Completed" | "Expired" | "Cancelled";
+  expiresAt: number;
   counterparty: string;
 };
 
-export type Balances = { gas: string; usdc: string; eurc: string };
+export type Balances = { usdc: string; eurc: string };
 
 type WalletHome = { balances: Balances; activity: ActivityItem[]; invoices: InvoiceRow[] };
 
@@ -37,15 +35,20 @@ function loadWallet(wallet: Address, fresh = false) {
   const hit = memo.get(key);
   if (!fresh && hit && Date.now() - hit.at < 45_000) return Promise.resolve(hit.data);
   const pending = inflight.get(key);
-  if (pending) return pending;
-  const p = request<WalletHome>(`/v1/wallets/${wallet}${fresh ? "?fresh=1" : ""}`).then((data) => {
-    memo.set(key, { at: Date.now(), data });
-    return data;
-  });
+  if (pending && !fresh) return pending;
+  const p = request<WalletHome>(`/v1/wallets/${wallet}${fresh ? "?fresh=1" : ""}`)
+    .then((data) => {
+      memo.set(key, { at: Date.now(), data });
+      return data;
+    })
+    .finally(() => inflight.delete(key));
   inflight.set(key, p);
-  p.finally(() => inflight.delete(key));
-  if (!fresh && hit) return Promise.resolve(hit.data);
   return p;
+}
+
+export function refreshWallet(wallet: Address | undefined) {
+  if (!wallet) return;
+  setTimeout(() => void loadWallet(wallet, true).catch(() => undefined), 3000);
 }
 
 export async function loadBalances(wallet: Address) {
@@ -85,15 +88,10 @@ export async function loadInvoice(id: bigint) {
   }
 }
 
-export async function invoiceIdFromTx(hash: string) {
-  const row = await request<{ id: string | null }>(`/v1/tx/${hash}/invoice-id`);
-  return row.id;
-}
-
 export async function waitInvoiceId(hash: string) {
   for (let i = 0; i < 20; i++) {
-    const id = await invoiceIdFromTx(hash).catch(() => null);
-    if (id) return id;
+    const row = await request<{ id: string | null }>(`/v1/tx/${hash}/invoice-id`).catch(() => null);
+    if (row?.id) return row.id;
     await new Promise((r) => setTimeout(r, 1500));
   }
   return null;

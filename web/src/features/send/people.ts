@@ -32,9 +32,7 @@ export function usePeople() {
       const rows = await loadActivity(wallet).catch(() => []);
       const addrs: string[] = [];
       const seen = new Set<string>();
-      const skip = new Set(
-        [wallet, ARC.contract, ARC.feeTo, ARC.usdc, ARC.eurc, "0x069a2C2eD093308233e449409B1547F2a55060c7", "0xf3a95153B5Da060EAC7B7c59D2cb37182f0f85d2"].map((a) => a.toLowerCase()),
-      );
+      const skip = new Set([wallet, ARC.contract, ARC.feeTo, ARC.usdc, ARC.eurc].map((a) => a.toLowerCase()));
       for (const row of rows) {
         const a = row.counterparty;
         const key = a.toLowerCase();

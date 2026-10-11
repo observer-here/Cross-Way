@@ -8,7 +8,7 @@ export function Avatar({ name, src, size = "md", tone }: { name: string; src?: s
   useEffect(() => setFailed(false), [src]);
   const box = `shrink-0 rounded-full ${sizes[size]}`;
   if (src && !failed) return <img src={src} alt="" onError={() => setFailed(true)} className={`${box} object-cover`} />;
-  const clean = name.replace(/^@/, "").trim() || "?";
+  const clean = name.replace(/^(@|0x)/i, "").trim() || "?";
   const color = tone ?? tones[clean.charCodeAt(0) % tones.length];
   return <span className={`grid place-items-center font-semibold text-white ${color} ${box}`}>{clean[0].toUpperCase()}</span>;
 }

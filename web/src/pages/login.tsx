@@ -8,7 +8,7 @@ import { Logo } from "@/shared/ui/logo";
 export function LoginPage() {
   if (!env.privyAppId) {
     return (
-      <main className="app-sky flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <Logo />
         <p className="mt-6 max-w-sm text-sm text-slate-500">
           Add your Privy app ID to <code className="text-slate-800">web/.env</code> as <code>VITE_PRIVY_APP_ID</code>, and the app
@@ -30,11 +30,11 @@ function EmailLogin() {
     if (ready && authenticated) nav(from, { replace: true });
   }, [ready, authenticated, from, nav]);
 
-  if (!ready) return <main className="app-sky min-h-screen" />;
+  if (!ready) return <main className="min-h-screen" />;
   if (authenticated) return <Navigate to={from} replace />;
 
   return (
-    <main className="app-sky flex min-h-screen flex-col items-center justify-center px-6">
+    <main className="flex min-h-screen flex-col items-center justify-center px-6">
       <Logo />
       <p className="mt-4 text-sm text-slate-500">Sign in with email. A wallet is created for you.</p>
       <button

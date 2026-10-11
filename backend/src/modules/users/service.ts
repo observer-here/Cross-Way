@@ -4,10 +4,10 @@ import { fetchUser } from "../../providers/privy";
 import { UsersRepo } from "./repo";
 import type { LookupQuery, ProfilePatch, PublicUser, User } from "./types";
 
-const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
-const USER_ID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
+const USERNAME_RE = /^[a-z0-9_]{3,48}$/;
 const AVATAR_MAX = 400_000;
 const AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 function toPublic(user: User): PublicUser {
   return {
@@ -22,15 +22,14 @@ function toPublic(user: User): PublicUser {
 }
 
 function parseUsername(value: string) {
-  const username = value.trim().toLowerCase();
+  const username = value.trim().toLowerCase().replace(/^@/, "");
   if (!USERNAME_RE.test(username)) fail(400, "invalid username");
   return username;
 }
 
-function parseUserId(value: string) {
-  const userId = value.trim();
-  if (!USER_ID_RE.test(userId)) fail(400, "invalid userId");
-  return userId;
+function randomUserId() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return Array.from(bytes, (b) => ID_CHARS[b % ID_CHARS.length]).join("");
 }
 
 export class UsersService {
@@ -76,14 +75,17 @@ export class UsersService {
     if (!privy) fail(401, "privy user not found");
     if (!privy.email) fail(400, "email required");
     if (!privy.wallet) fail(400, "wallet required");
-    const now = Date.now();
     const existing = await this.repo.byId(privy.id);
     if (existing) {
-      await this.repo.saveContact(privy.id, privy.email, privy.wallet, now);
+      await this.ensureIdentity(existing);
       return this.getMe(privy.id);
     }
+    const takenEmail = await this.repo.lookup({ email: privy.email });
+    if (takenEmail) fail(409, "email taken");
+    const takenWallet = await this.repo.lookup({ wallet: privy.wallet });
+    if (takenWallet) fail(409, "wallet taken");
     try {
-      await this.repo.create(privy.id, privy.email, privy.wallet, now);
+      await this.repo.create(privy.id, privy.email, privy.wallet, await this.freshUsername(), await this.freshUserId(), Date.now());
     } catch {
       fail(409, "email or wallet taken");
     }
@@ -92,12 +94,12 @@ export class UsersService {
 
   async updateProfile(id: string, patch: ProfilePatch) {
     const user = await this.getMe(id);
-    const username = patch.username === undefined ? user.username : parseUsername(patch.username);
-    const userId = patch.userId === undefined ? user.user_id : parseUserId(patch.userId);
+    if (patch.username === undefined) return user;
+    const username = parseUsername(patch.username);
     try {
-      await this.repo.saveProfile(id, username, userId, Date.now());
+      await this.repo.saveUsername(id, username, Date.now());
     } catch {
-      fail(409, "username or userId taken");
+      fail(409, "username taken");
     }
     return this.getMe(id);
   }
@@ -113,5 +115,26 @@ export class UsersService {
 
   avatar(id: string) {
     return this.repo.avatar(id);
+  }
+
+  private async ensureIdentity(user: User) {
+    if (user.username && user.user_id) return;
+    await this.repo.fillIdentity(user.id, user.username ?? (await this.freshUsername()), user.user_id ?? (await this.freshUserId()), Date.now());
+  }
+
+  private async freshUsername() {
+    for (let i = 0; i < 16; i++) {
+      const username = await this.repo.nextUsername();
+      if (!(await this.repo.lookup({ username }))) return username;
+    }
+    fail(500, "username failed");
+  }
+
+  private async freshUserId() {
+    for (let i = 0; i < 16; i++) {
+      const userId = randomUserId();
+      if (!(await this.repo.lookup({ userId }))) return userId;
+    }
+    fail(500, "user id failed");
   }
 }

@@ -14,7 +14,7 @@ export function RequireAuth() {
 
 function Gate({ from }: { from: string }) {
   const { ready, authenticated } = usePrivy();
-  if (!ready) return <div className="app-sky min-h-screen" />;
+  if (!ready) return <div className="min-h-screen" />;
   if (!authenticated) return <Navigate to="/login" replace state={{ from }} />;
   return <Layout />;
 }

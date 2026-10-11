@@ -18,11 +18,15 @@ export function lookup(query: { q?: string; email?: string; username?: string; u
   return request<PublicUser>(`/v1/lookup?${params}`);
 }
 
+export function getMe(token: string) {
+  return request<User>("/v1/me", { method: "GET" }, token);
+}
+
 export function syncMe(token: string) {
   return request<User>("/v1/me", { method: "POST" }, token);
 }
 
-export function updateMe(token: string, body: { username?: string; userId?: string }) {
+export function updateMe(token: string, body: { username?: string }) {
   return request<User>("/v1/me", { method: "PATCH", body: JSON.stringify(body) }, token);
 }
 

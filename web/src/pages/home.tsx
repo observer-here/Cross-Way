@@ -5,13 +5,17 @@ import { useSession } from "@/auth/session";
 import { labelOf } from "@/lib/format";
 
 export function HomePage() {
-  const { me, wallet } = useSession();
-  const name = labelOf(me?.email, me?.username, wallet).replace(/^@/, "");
+  const { me } = useSession();
+  const name = labelOf(me?.username, me?.email).replace(/^@/, "");
 
   return (
     <div className="page">
       <p className="text-base font-normal text-slate-400 italic lg:text-[22px]">Welcome back,</p>
-      <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-[56px] lg:leading-none">{name}</h1>
+      {name ? (
+        <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-[56px] lg:leading-none">{name}</h1>
+      ) : (
+        <span className="skel mt-1.5 h-10 w-52 rounded-lg sm:h-12 sm:w-72 lg:h-14 lg:w-80" />
+      )}
       <p className="mt-1.5 text-xs text-slate-500 lg:mt-3 lg:text-sm">Send, receive and manage your payments on Arc Testnet.</p>
       <div className="mt-4 lg:mt-8">
         <Actions />

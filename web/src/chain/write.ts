@@ -5,6 +5,7 @@ import { toTokenAmount } from "@/lib/format";
 
 import { crossWayAbi } from "./abi";
 import { ARC, GAS, TOKENS } from "./arc";
+import { refreshWallet } from "./read";
 
 export type ArcWallet = {
   address: Address | undefined;
@@ -19,14 +20,8 @@ function memoBytes(memo: string) {
   return memo ? toHex(memo) : "0x";
 }
 
-function expiry(days = 7) {
+function expiry(days: number) {
   return BigInt(Math.floor(Date.now() / 1000) + days * 86400);
-}
-
-function expiryAt(date?: string) {
-  if (!date) return expiry(7);
-  const t = Math.floor(new Date(`${date}T23:59:59`).getTime() / 1000);
-  return Number.isFinite(t) ? BigInt(t) : expiry(7);
 }
 
 function sender(wallet: ArcWallet, client: WalletClient) {
@@ -57,7 +52,7 @@ async function approve(wallet: ArcWallet, token: Address, amount: bigint) {
 
 async function exec(wallet: ArcWallet, functionName: "sendToAddress" | "createRequest" | "createLink" | "pay" | "cancel", args: readonly unknown[]) {
   const client = await wallet.client();
-  return client.writeContract({
+  const hash = await client.writeContract({
     address: ARC.contract,
     abi: crossWayAbi,
     functionName,
@@ -65,6 +60,8 @@ async function exec(wallet: ArcWallet, functionName: "sendToAddress" | "createRe
     ...sender(wallet, client),
     ...GAS,
   });
+  refreshWallet(wallet.address);
+  return hash;
 }
 
 export async function sendPayment(wallet: ArcWallet, to: string, amount: string, symbol: string, memo: string) {
@@ -75,17 +72,15 @@ export async function sendPayment(wallet: ArcWallet, to: string, amount: string,
   return exec(wallet, "sendToAddress", [dest, token.address, value, memoBytes(memo)]);
 }
 
-export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string, expires?: string) {
+export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string, days: number) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
-  const until = expiryAt(expires);
-  if (!from.trim()) return exec(wallet, "createLink", [token.address, value, until, memoBytes(memo)]);
-  return exec(wallet, "createRequest", [await resolveWallet(from), token.address, value, until, memoBytes(memo)]);
+  if (!from.trim()) return exec(wallet, "createLink", [token.address, value, expiry(days), memoBytes(memo)]);
+  return exec(wallet, "createRequest", [await resolveWallet(from), token.address, value, expiry(days), memoBytes(memo)]);
 }
 
-export async function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, expires?: string) {
-  const token = tokenOf(symbol);
-  return exec(wallet, "createLink", [token.address, toTokenAmount(amount, token.decimals), expiryAt(expires), memoBytes(memo)]);
+export function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, days: number) {
+  return createPaymentRequest(wallet, "", amount, symbol, memo, days);
 }
 
 export async function payInvoice(wallet: ArcWallet, id: bigint, token: Address, amount: bigint) {

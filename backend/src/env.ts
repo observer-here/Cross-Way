@@ -4,8 +4,6 @@ export type Env = {
   PRIVY_APP_SECRET: string;
   FRONTEND_ORIGIN: string;
   CONTRACT_ADDRESS: string;
-  CHAIN_ID: string;
-  RPC_URL: string;
   ARCSCAN_URL: string;
   USDC: string;
   EURC: string;
