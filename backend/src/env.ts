@@ -5,6 +5,7 @@ export type Env = {
   FRONTEND_ORIGIN: string;
   CONTRACT_ADDRESS: string;
   ARCSCAN_URL: string;
+  RPC_URL: string;
   USDC: string;
   EURC: string;
   FEE_TO: string;

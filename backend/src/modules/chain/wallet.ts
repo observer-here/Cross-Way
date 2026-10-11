@@ -8,7 +8,6 @@ const TOPICS = {
   paid: "0x0bc4723e296c91e623d7c3378104610d6df483c9259924aaa2c04527b2df8ede",
 };
 
-type TokenBal = { value?: string; token?: { address_hash?: string; decimals?: string } };
 type Transfer = {
   transaction_hash: string;
   timestamp?: string;
@@ -97,22 +96,31 @@ async function contractLogs(env: Env) {
   return page.items ?? [];
 }
 
+async function balances(env: Env, wallet: string) {
+  const data = `0x70a08231${wallet.slice(2).toLowerCase().padStart(64, "0")}`;
+  const res = await fetch(env.RPC_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify([env.USDC, env.EURC].map((to, id) => ({ jsonrpc: "2.0", id, method: "eth_call", params: [{ to, data }, "latest"] }))),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error("rpc failed");
+  const rows = (await res.json()) as { id: number; result?: string }[];
+  const of = (id: number) => units(rows.find((row) => row.id === id)?.result ?? "0x0");
+  return { usdc: of(0), eurc: of(1) };
+}
+
 export async function loadWalletHome(env: Env, wallet: string) {
   const me = wallet.toLowerCase();
   const feeTo = env.FEE_TO?.toLowerCase();
   const wanted = new Set([env.USDC.toLowerCase(), env.EURC.toLowerCase()]);
-  const [tokens, transfers, logs] = await Promise.all([
-    scan<TokenBal[]>(env, `/addresses/${wallet}/token-balances`),
+  const [bal, transfers, logs] = await Promise.all([
+    balances(env, wallet),
     scan<{ items?: Transfer[] }>(env, `/addresses/${wallet}/token-transfers?type=ERC-20`),
     contractLogs(env),
   ]);
-  const held = Array.isArray(tokens) ? tokens : [];
-  const balance = (addr: string) => {
-    const row = held.find((t) => t.token?.address_hash?.toLowerCase() === addr.toLowerCase());
-    return units(row?.value ?? "0", Number(row?.token?.decimals ?? 6));
-  };
   return {
-    balances: { usdc: balance(env.USDC), eurc: balance(env.EURC) },
+    balances: bal,
     activity: (transfers.items ?? [])
       .filter(
         (row) =>
