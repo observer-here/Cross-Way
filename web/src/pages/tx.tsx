@@ -28,8 +28,8 @@ export function TxPage() {
       <Link to="/history" className="text-sm text-slate-400">
         ← History
       </Link>
-      <h1 className="mt-3 text-2xl font-semibold">Transaction Details</h1>
-      <div className="panel mt-6 p-6">
+      <h1 className="mt-2 text-xl font-semibold lg:mt-3 lg:text-2xl">Transaction Details</h1>
+      <div className="panel mt-3 p-4 lg:mt-6 lg:p-6">
         <p className={`text-3xl font-semibold ${tx.dir === "out" ? "text-slate-800" : "text-emerald-500"}`}>
           {tx.dir === "out" ? "-" : "+"}
           {tx.amount} {tx.token}

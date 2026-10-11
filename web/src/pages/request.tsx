@@ -52,10 +52,10 @@ export function RequestPage() {
         </SoftIcon>
       </SideMark>
       <section>
-        <h1 className="text-2xl font-semibold">Request Payment</h1>
+        <h1 className="text-xl font-semibold lg:text-2xl">Request Payment</h1>
         <p className="mt-1 text-sm text-slate-500">Create a request and let anyone pay you.</p>
-        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <form className="panel flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+        <div className="mt-3 grid items-start gap-3 lg:mt-6 lg:gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <form className="panel flex flex-col gap-3 p-4 lg:gap-5 lg:p-8" onSubmit={onSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Amount">
               <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" required />
@@ -77,7 +77,7 @@ export function RequestPage() {
           <Glow disabled={!signer.address}>{signer.address ? "Create Request →" : "Wallet loading…"}</Glow>
           {status && <p className="text-sm text-slate-500">{status}</p>}
         </form>
-      <aside className="panel p-5">
+      <aside className="panel p-3.5 lg:p-5">
         <h2 className="text-sm font-semibold">Recent Requests</h2>
         {!rows && <p className="mt-6 text-sm text-slate-400">Loading…</p>}
         {rows && rows.length === 0 && <p className="mt-6 text-sm text-slate-400">No requests yet.</p>}

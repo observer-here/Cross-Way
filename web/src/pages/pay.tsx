@@ -5,7 +5,7 @@ import { useSession } from "@/auth/session";
 import { loadInvoice } from "@/chain/read";
 import { cancelInvoice, payInvoice } from "@/chain/write";
 import { useArcWallet } from "@/chain/wallet";
-import { personLabel, shortAddress } from "@/lib/format";
+import { feeParts, personLabel, shortAddress } from "@/lib/format";
 import { Avatar } from "@/shared/ui/avatar";
 import { Submit } from "@/shared/ui/field";
 
@@ -32,6 +32,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
   if (!inv) return <p className="page text-sm text-slate-500">{status || "Invoice not found."}</p>;
   const invoice = inv;
   const mine = wallet && wallet.toLowerCase() === invoice.payee.toLowerCase();
+  const fee = feeParts(invoice.amount);
 
   async function pay() {
     setStatus("Paying…");
@@ -46,9 +47,9 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
 
   return (
     <div className="page">
-      <h1 className="text-2xl font-semibold">Complete Payment</h1>
+      <h1 className="text-xl font-semibold lg:text-2xl">Complete Payment</h1>
       <p className="mt-1 text-sm text-slate-500">Review the details and confirm.</p>
-      <div className="panel mt-6 grid gap-8 p-6 lg:grid-cols-2 lg:p-10">
+      <div className="panel mt-3 grid gap-5 p-4 lg:mt-6 lg:grid-cols-2 lg:gap-8 lg:p-10">
         <div>
           <div className="flex items-center gap-3">
             <Avatar name={invoice.payee} size="lg" />
@@ -76,6 +77,18 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
               <dt className="text-slate-400">Amount</dt>
               <dd>
                 {invoice.amount} {invoice.token}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-slate-400">Platform fee (0.5%)</dt>
+              <dd>
+                {fee.fee} {invoice.token}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-slate-400">Recipient gets</dt>
+              <dd>
+                {fee.net} {invoice.token}
               </dd>
             </div>
             <div className="flex justify-between">

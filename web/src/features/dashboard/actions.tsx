@@ -9,17 +9,17 @@ const items = [
 
 export function Actions() {
   return (
-    <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 lg:gap-3 xl:grid-cols-4">
       {items.map((item) => (
-        <Link key={item.title} to={item.to} className="dash-card flex flex-col items-start gap-3 px-4 py-3.5 sm:flex-row sm:items-center">
-          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${item.bg}`}>
+        <Link key={item.title} to={item.to} className="dash-card flex flex-col items-start gap-2 px-3 py-2.5 sm:flex-row sm:items-center lg:gap-3 lg:px-4 lg:py-3.5">
+          <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl lg:h-11 lg:w-11 lg:rounded-2xl ${item.bg}`}>
             <svg viewBox="0 0 24 24" className={`h-5 w-5 ${item.stroke ? "fill-none stroke-current" : "fill-current"}`} strokeWidth={item.stroke ? 1.8 : undefined} strokeLinecap="round" strokeLinejoin="round">
               <path d={item.icon} />
             </svg>
           </span>
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-slate-800">{item.title}</span>
-            <span className="block text-xs text-slate-400 sm:truncate">{item.desc}</span>
+            <span className="hidden text-xs text-slate-400 sm:truncate lg:block">{item.desc}</span>
           </span>
         </Link>
       ))}

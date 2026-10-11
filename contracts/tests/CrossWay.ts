@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 describe("CrossWay", function () {
   async function setup() {
-    const [, alice, bob, carol] = await ethers.getSigners();
+    const [owner, alice, bob, carol] = await ethers.getSigners();
     const token = await ethers.deployContract("MockERC20");
     const pay = await ethers.deployContract("CrossWay");
     await pay.setToken(await token.getAddress(), true);
@@ -12,13 +12,14 @@ describe("CrossWay", function () {
       await token.mint(s.address, 1_000_000_000);
       await token.connect(s).approve(await pay.getAddress(), ethers.MaxUint256);
     }
-    return { alice, bob, carol, token, pay };
+    return { owner, alice, bob, carol, token, pay };
   }
 
-  it("sends to an address", async function () {
-    const { alice, bob, token, pay } = await loadFixture(setup);
+  it("sends to an address and takes 0.5% fee", async function () {
+    const { owner, alice, bob, token, pay } = await loadFixture(setup);
     await pay.connect(alice).sendToAddress(bob.address, await token.getAddress(), 10_000_000, "0x6869");
-    expect(await token.balanceOf(bob.address)).to.equal(1_010_000_000);
+    expect(await token.balanceOf(bob.address)).to.equal(1_009_950_000);
+    expect(await token.balanceOf(owner.address)).to.equal(50_000);
   });
 
   it("requests, links, redeems, and cancels", async function () {
@@ -35,7 +36,7 @@ describe("CrossWay", function () {
     await pay.connect(bob).createLink(t, 1, exp, "0x");
     await pay.connect(bob).cancel(4);
     await expect(pay.connect(alice).pay(4, "0x")).to.be.revertedWithCustomError(pay, "Closed");
-    expect(await token.balanceOf(bob.address)).to.equal(1_011_000_000);
+    expect(await token.balanceOf(bob.address)).to.equal(1_010_945_000);
     expect((await pay.invoices(1)).payee).to.equal(ethers.ZeroAddress);
     expect((await pay.invoices(4)).payee).to.equal(ethers.ZeroAddress);
   });

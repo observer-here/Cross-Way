@@ -32,15 +32,16 @@ export function usePeople() {
       const rows = await loadActivity(wallet).catch(() => []);
       const addrs: string[] = [];
       const seen = new Set<string>();
-      const me = wallet.toLowerCase();
-      const contract = ARC.contract.toLowerCase();
+      const skip = new Set(
+        [wallet, ARC.contract, ARC.feeTo, ARC.usdc, ARC.eurc, "0x069a2C2eD093308233e449409B1547F2a55060c7", "0xf3a95153B5Da060EAC7B7c59D2cb37182f0f85d2"].map((a) => a.toLowerCase()),
+      );
       for (const row of rows) {
         const a = row.counterparty;
         const key = a.toLowerCase();
-        if (!a || seen.has(key) || key === me || key === contract) continue;
+        if (!a || seen.has(key) || skip.has(key)) continue;
         seen.add(key);
         addrs.push(a);
-        if (addrs.length >= 12) break;
+        if (addrs.length >= 8) break;
       }
       const list = await Promise.all(addrs.map(enrich));
       if (alive) setPeople(list);

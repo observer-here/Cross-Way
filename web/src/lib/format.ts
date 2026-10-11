@@ -33,6 +33,14 @@ export function todayPlus(days: number) {
   return d.toISOString().slice(0, 10);
 }
 
+export function feeParts(amount: string) {
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return { fee: "0.00", net: "0.00" };
+  const fee = n * 0.005;
+  const fmt = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+  return { fee: fmt(fee), net: fmt(n - fee) };
+}
+
 export function shortTime(value?: string) {
   if (!value) return "";
   const d = new Date(value);

@@ -7,7 +7,8 @@ export const ARC = {
   explorer: "https://explorer.testnet.arc.io",
   usdc: "0x3600000000000000000000000000000000000000" as const,
   eurc: "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a" as const,
-  contract: "0xf3a95153B5Da060EAC7B7c59D2cb37182f0f85d2" as const,
+  contract: "0xA10c2Cb1C8CD60409d2322A2f532b7F03ee2B6fc" as const,
+  feeTo: "0xA7b4c3A498B7FE206fCD3888bDe6b72264729f4a" as const,
 };
 
 export const arcChain = defineChain({

@@ -27,7 +27,7 @@ export function Activity({ title = "Recent Activity", all = false }: { title?: s
   const shown = rows ? (all ? rows : rows.slice(0, Math.max(0, 4 - pendingShown.length))) : [];
 
   return (
-    <section className="dash-card p-6">
+    <section className="dash-card p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
         {!all && (
@@ -66,7 +66,7 @@ export function Activity({ title = "Recent Activity", all = false }: { title?: s
 function Row({ to, kind, title, time, amount, tone, done }: { to: string; kind: Kind; title: string; time: string; amount: string; tone: string; done?: boolean }) {
   return (
     <li>
-      <Link to={to} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3">
+      <Link to={to} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 py-2 lg:gap-3 lg:py-3">
         <KindIcon kind={kind} />
         <span className="min-w-0">
           <span className="block truncate text-sm font-medium text-slate-800">{title}</span>

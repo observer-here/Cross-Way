@@ -25,8 +25,8 @@ export function ScanPage() {
         </SoftIcon>
       </SideMark>
       <section className="flex flex-col items-center">
-        <h1 className="self-start text-2xl font-semibold">Your QR Code</h1>
-        <div className="panel mt-6 flex w-full max-w-md flex-col items-center p-8">
+        <h1 className="self-start text-xl font-semibold lg:text-2xl">Your QR Code</h1>
+        <div className="panel mt-3 flex w-full max-w-md flex-col items-center p-5 lg:mt-6 lg:p-8">
           <div className="flex rounded-full bg-slate-100 p-1 text-sm">
             {(["USDC", "EURC"] as const).map((item) => (
               <button
@@ -46,7 +46,7 @@ export function ScanPage() {
           <p className="mt-3 font-mono text-xs text-slate-400">{shortAddress(wallet)}</p>
         </div>
       </section>
-      <aside className="panel p-6 text-sm">
+      <aside className="panel p-4 text-sm lg:p-6">
         <p className="font-semibold">Receive to</p>
         <p className="mt-3 text-slate-500">USDC / EURC</p>
         <p className="mt-6 font-semibold">Network</p>

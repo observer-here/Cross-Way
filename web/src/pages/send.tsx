@@ -1,5 +1,5 @@
 import { isAddress } from "viem";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { ARC } from "@/chain/arc";
@@ -7,7 +7,7 @@ import { useBalances } from "@/chain/balances";
 import { useArcWallet } from "@/chain/wallet";
 import { sendPayment } from "@/chain/write";
 import { usePeople, type Person } from "@/features/send/people";
-import { personLabel, shortAddress } from "@/lib/format";
+import { feeParts, personLabel, shortAddress } from "@/lib/format";
 import { Avatar, PersonChip } from "@/shared/ui/avatar";
 import { Field, Glow, Input, Select, Textarea } from "@/shared/ui/field";
 import { GlassX, SideMark } from "@/shared/ui/mark";
@@ -23,19 +23,12 @@ export function SendPage() {
   const [memo, setMemo] = useState("");
   const [step, setStep] = useState<"form" | "review" | "sent">("form");
   const [hash, setHash] = useState("");
-  const [tab, setTab] = useState<"contacts" | "recent">("contacts");
-  const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const bal = token === "EURC" ? data?.eurc : data?.usdc;
   const who = people.find((p) => p.to.toLowerCase() === to.toLowerCase() || p.sub.toLowerCase() === to.toLowerCase());
   const label = who?.label ?? personLabel(to);
   const sub = who?.sub ?? (isAddress(to) ? to : to.includes("@") ? to : undefined);
-  const list = useMemo(() => {
-    const src = tab === "recent" ? people.slice(0, 8) : people;
-    const s = q.trim().toLowerCase();
-    if (!s) return src;
-    return src.filter((p) => `${p.label} ${p.sub} ${p.to}`.toLowerCase().includes(s));
-  }, [people, tab, q]);
+  const fee = feeParts(amount);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,7 +59,7 @@ export function SendPage() {
 
   if (step === "sent") {
     return (
-      <div className="page flex flex-col items-center pt-8">
+      <div className="page flex flex-col items-center pt-4 lg:pt-8">
         <span className="grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-500">
           <svg viewBox="0 0 24 24" className="h-8 w-8 fill-none stroke-current" strokeWidth="2.4">
             <path d="M5 12.5 9.5 17 19 7" />
@@ -74,7 +67,7 @@ export function SendPage() {
         </span>
         <h1 className="mt-5 text-3xl font-semibold">Payment Sent!</h1>
         <p className="mt-2 text-sm text-slate-400">Your payment has been successfully sent.</p>
-        <div className="panel mt-8 w-full max-w-xl p-6">
+        <div className="panel mt-5 w-full max-w-xl p-4 lg:mt-8 lg:p-6">
           <div className="flex items-center gap-3">
             <Avatar name={label} src={who?.src} size="sm" />
             <div>
@@ -105,9 +98,9 @@ export function SendPage() {
     return (
       <div className="page grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
         <section>
-          <h1 className="text-2xl font-semibold">Review & Send</h1>
+          <h1 className="text-xl font-semibold lg:text-2xl">Review & Send</h1>
           <p className="mt-1 text-sm text-slate-400">Please review the details before confirming this payment.</p>
-          <div className="panel mt-6 p-6 lg:p-8">
+          <div className="panel mt-3 p-4 lg:mt-6 lg:p-8">
             <dl className="grid gap-5 sm:grid-cols-2">
               <ReviewRow label="To" tone="bg-violet-50 text-violet-500" icon="M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20c1.5-4 14.5-4 16 0" onEdit={() => setStep("form")}>
                 <span className="flex items-center gap-2">
@@ -131,11 +124,23 @@ export function SendPage() {
                 </span>
               </div>
               <div className="mt-2 flex justify-between text-slate-500">
+                <span>Platform fee (0.5%)</span>
+                <span>
+                  {fee.fee} {token}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between text-slate-500">
+                <span>Recipient gets</span>
+                <span>
+                  {fee.net} {token}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between text-slate-500">
                 <span>Network fee (gas)</span>
                 <span>USDC gas</span>
               </div>
               <div className="mt-3 flex justify-between border-t border-slate-200 pt-3 font-semibold">
-                <span>Total</span>
+                <span>You pay</span>
                 <span>
                   {amount} {token}
                 </span>
@@ -172,9 +177,9 @@ export function SendPage() {
     <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
       <SideMark text="Send tokens to anyone. Anywhere." />
       <section>
-        <h1 className="text-2xl font-semibold">Send Payment</h1>
-        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <form className="panel flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+        <h1 className="text-xl font-semibold lg:text-2xl">Send Payment</h1>
+        <div className="mt-3 grid items-start gap-3 lg:mt-6 lg:gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <form className="panel flex flex-col gap-3 p-4 lg:gap-5 lg:p-8" onSubmit={onSubmit}>
           <Field label="To">
             <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="username, email, EVM address or user ID" required />
           </Field>
@@ -195,25 +200,22 @@ export function SendPage() {
               Balance: {bal} {token}
             </p>
           )}
+          {Number(amount) > 0 && (
+            <p className="text-xs text-slate-400">
+              Platform fee 0.5% ({fee.fee} {token}). Recipient gets {fee.net} {token}.
+            </p>
+          )}
           <Field label="Message (optional)">
             <Textarea value={memo} onChange={(e) => setMemo(e.target.value)} maxLength={200} placeholder="For project payment, coffee..." />
           </Field>
           <p className="text-right text-[11px] text-slate-400">{memo.length}/200</p>
           <Glow disabled={!wallet.address}>{wallet.address ? "Review & Send →" : "Wallet loading…"}</Glow>
           </form>
-          <aside className="panel p-5">
-            <div className="flex rounded-full bg-slate-100 p-1 text-sm">
-              <button type="button" onClick={() => setTab("contacts")} className={`flex-1 rounded-full py-1.5 ${tab === "contacts" ? "bg-white shadow-sm" : "text-slate-400"}`}>
-                Contacts
-              </button>
-              <button type="button" onClick={() => setTab("recent")} className={`flex-1 rounded-full py-1.5 ${tab === "recent" ? "bg-white shadow-sm" : "text-slate-400"}`}>
-                Recent
-              </button>
-            </div>
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search contacts..." className="mt-4" />
+          <aside className="panel p-3.5 lg:p-5">
+            <p className="text-sm font-semibold">Recent</p>
             <ul className="mt-2">
-              {list.length === 0 && <li className="py-10 text-center text-sm text-slate-400">No contacts yet.</li>}
-              {list.map((p) => (
+              {people.length === 0 && <li className="py-10 text-center text-sm text-slate-400">No recent payments.</li>}
+              {people.map((p) => (
                 <li key={p.to}>
                   <PersonRow person={p} onPick={setTo} />
                 </li>
@@ -232,7 +234,7 @@ function PersonRow({ person, onPick }: { person: Person; onPick: (to: string) =>
       <Avatar name={person.label} src={person.src} size="sm" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{person.label}</span>
-        <span className="block truncate text-[11px] text-slate-400">{person.sub}</span>
+        {person.sub !== person.label && <span className="block truncate text-[11px] text-slate-400">{person.sub}</span>}
       </span>
       <svg viewBox="0 0 24 24" className="h-4 w-4 fill-indigo-400">
         <path d="M3 11.5 21 3l-7.5 18-2.4-6.6L3 11.5z" />

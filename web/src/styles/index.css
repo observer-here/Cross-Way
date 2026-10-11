@@ -5,7 +5,11 @@
   --font-script: "Caveat", cursive;
 }
 
-html,
+html {
+  min-height: 100%;
+  background: #eef2ff;
+}
+
 body,
 #root {
   min-height: 100%;
@@ -13,9 +17,28 @@ body,
 
 body {
   margin: 0;
-  background: #eef1ff;
   color: #16182b;
   font-family: var(--font-sans);
+  background: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 55% at 8% -8%, rgb(167 139 250 / 0.5), transparent 58%),
+    radial-gradient(70% 48% at 100% 0%, rgb(56 189 248 / 0.32), transparent 54%),
+    radial-gradient(55% 40% at 85% 100%, rgb(196 181 253 / 0.38), transparent 58%),
+    radial-gradient(45% 32% at 0% 90%, rgb(125 211 252 / 0.22), transparent 52%),
+    linear-gradient(180deg, #f4f1ff 0%, #eef2ff 46%, #f7f8fc 100%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 input,
@@ -27,7 +50,7 @@ textarea {
 
 .page {
   width: 100%;
-  padding: 0 1.5rem 4rem;
+  padding: 0 0.75rem 5.75rem;
 }
 @media (min-width: 1024px) {
   .page {
@@ -43,22 +66,24 @@ textarea {
 .panel {
   background: rgb(255 255 255 / 0.82);
   border: 1px solid rgb(255 255 255 / 0.95);
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   box-shadow: 0 16px 40px rgb(80 90 160 / 0.07);
 }
 
 .dash-card {
   background: #fff;
   border: 1px solid rgb(255 255 255 / 0.95);
-  border-radius: 22px;
+  border-radius: 16px;
   box-shadow: 0 14px 40px rgb(99 102 241 / 0.07);
 }
 
-.landing-sky,
-.app-sky {
-  background:
-    linear-gradient(180deg, rgb(248 246 255 / 0.78) 0%, rgb(244 246 255 / 0.28) 26%, rgb(255 255 255 / 0.05) 48%, rgb(248 250 255 / 0.82) 100%),
-    url("/landing-bg.jpg") center 38% / cover no-repeat;
+@media (min-width: 1024px) {
+  .panel {
+    border-radius: 1.5rem;
+  }
+  .dash-card {
+    border-radius: 22px;
+  }
 }
 
 .glass-x {

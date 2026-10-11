@@ -46,9 +46,9 @@ export function LinksPage() {
   if (done && link) {
     return (
       <div className="page">
-        <h1 className="text-2xl font-semibold">Payment Link Details</h1>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <div className="panel p-6 lg:p-8">
+        <h1 className="text-xl font-semibold lg:text-2xl">Payment Link Details</h1>
+        <div className="mt-3 grid gap-3 lg:mt-6 lg:gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="panel p-4 lg:p-8">
             <div className="flex items-start gap-3">
               <SoftIcon className="bg-emerald-50 text-emerald-500">
                 <svg viewBox="0 0 24 24" className="h-6 w-6 fill-none stroke-current" strokeWidth="2">
@@ -92,7 +92,7 @@ export function LinksPage() {
               Create another
             </button>
           </div>
-          <div className="panel flex flex-col items-center p-6">
+          <div className="panel flex flex-col items-center p-4 lg:p-6">
             <img src={qrSrc(link)} alt="Payment QR" className="h-44 w-44 rounded-xl bg-white p-2" />
             <p className="mt-4 text-sm font-medium">Scan to Pay</p>
           </div>
@@ -111,10 +111,10 @@ export function LinksPage() {
         </SoftIcon>
       </SideMark>
       <section>
-        <h1 className="text-2xl font-semibold">Create Payment Link</h1>
+        <h1 className="text-xl font-semibold lg:text-2xl">Create Payment Link</h1>
         <p className="mt-1 text-sm text-slate-500">Generate a payment link to receive tokens.</p>
-        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <form className="panel flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+        <div className="mt-3 grid items-start gap-3 lg:mt-6 lg:gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <form className="panel flex flex-col gap-3 p-4 lg:gap-5 lg:p-8" onSubmit={onSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Amount (optional)">
               <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" required />
@@ -133,7 +133,7 @@ export function LinksPage() {
           <Glow disabled={!wallet.address}>{wallet.address ? "Generate Link →" : "Wallet loading…"}</Glow>
           {status && <p className="text-sm text-slate-500">{status}</p>}
         </form>
-      <aside className="panel flex flex-col items-center p-6">
+      <aside className="panel flex flex-col items-center p-3.5 lg:p-6">
         <p className="self-start text-sm font-semibold">Preview</p>
         <img src={qrSrc(link || "crossway")} alt="" className="mt-6 h-40 w-40 rounded-xl bg-white p-2" />
         <p className="mt-4 max-w-full truncate text-xs text-slate-400">{link || "Preview after you generate"}</p>

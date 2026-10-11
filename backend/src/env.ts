@@ -6,8 +6,10 @@ export type Env = {
   CONTRACT_ADDRESS: string;
   CHAIN_ID: string;
   RPC_URL: string;
+  ARCSCAN_URL: string;
   USDC: string;
   EURC: string;
+  FEE_TO: string;
 };
 
 export type AppEnv = {

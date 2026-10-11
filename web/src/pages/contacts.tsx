@@ -48,9 +48,9 @@ export function ContactsPage() {
 
   return (
     <section className="page">
-      <h1 className="text-2xl font-semibold">Contacts</h1>
+      <h1 className="text-xl font-semibold lg:text-2xl">Contacts</h1>
       <p className="mt-1 text-sm text-slate-500">People you have paid or been paid by.</p>
-      <div className="panel mt-6 p-5">
+      <div className="panel mt-3 p-3.5 lg:mt-6 lg:p-5">
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search username, email or address..." />
         <div className="mt-4 flex gap-2 text-xs">
           {(["all", "users", "emails", "addresses"] as const).map((item) => (

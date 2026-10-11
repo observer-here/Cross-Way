@@ -11,7 +11,7 @@ export function Balance() {
   const amount = raw == null ? "" : Number(raw).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <section className="dash-card flex flex-col p-6">
+    <section className="dash-card flex flex-col p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
           Your Balance
@@ -29,9 +29,9 @@ export function Balance() {
       {err && <p className="mt-8 text-sm text-rose-500">{err}</p>}
       {data && (
         <>
-          <div className="relative mt-4 min-h-[132px]">
-            <p className="relative z-10 text-5xl font-bold tracking-tight text-slate-950">{open ? `$${amount}` : "••••"}</p>
-            <svg viewBox="0 0 260 120" className="absolute right-0 bottom-0 h-28 w-[62%] text-violet-400" preserveAspectRatio="none" aria-hidden>
+          <div className="relative mt-3 min-h-[96px] lg:mt-4 lg:min-h-[132px]">
+            <p className="relative z-10 text-4xl font-bold tracking-tight text-slate-950 lg:text-5xl">{open ? `$${amount}` : "••••"}</p>
+            <svg viewBox="0 0 260 120" className="absolute right-0 bottom-0 h-20 w-[58%] text-violet-400 lg:h-28 lg:w-[62%]" preserveAspectRatio="none" aria-hidden>
               <defs>
                 <linearGradient id="balance-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="currentColor" stopOpacity="0.38" />
@@ -42,14 +42,14 @@ export function Balance() {
               <path d="M0 86 C28 84 48 78 72 64 C102 46 112 72 148 58 C176 48 196 36 228 18 C244 10 252 16 260 6" fill="none" stroke="currentColor" strokeWidth="2.4" />
             </svg>
           </div>
-          <div className="mt-5 flex gap-3">
-            <Link to="/scan" className="inline-flex items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm">
+          <div className="mt-3 flex gap-2 lg:mt-5 lg:gap-3">
+            <Link to="/scan" className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm lg:rounded-2xl lg:px-4 lg:py-2.5">
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.8">
                 <path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14" />
               </svg>
               Deposit
             </Link>
-            <Link to="/send" className="inline-flex items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm">
+            <Link to="/send" className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm lg:rounded-2xl lg:px-4 lg:py-2.5">
               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.8">
                 <path d="M7 7h8a3 3 0 0 1 3 3M17 17H9a3 3 0 0 1-3-3" />
                 <path d="m16 4 3 3-3 3M8 20l-3-3 3-3" />

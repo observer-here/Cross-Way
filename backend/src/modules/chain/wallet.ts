@@ -73,26 +73,23 @@ function invoiceFields(log: Log, usdc: string) {
   };
 }
 
-async function contractLogs(env: Env, ttl = 12) {
-  const page = await scanGet<{ items?: Log[] }>(`/addresses/${env.CONTRACT_ADDRESS}/logs`, ttl);
+function scan<T>(env: Env, path: string) {
+  return scanGet<T>(env.ARCSCAN_URL, path);
+}
+
+async function contractLogs(env: Env) {
+  const page = await scan<{ items?: Log[] }>(env, `/addresses/${env.CONTRACT_ADDRESS}/logs`);
   return page.items ?? [];
 }
 
-export async function loadWalletHome(env: Env, wallet: string, fresh = false) {
-  const ttl = fresh ? 0 : 12;
-  const cache = await caches.open("arc-scan");
-  const key = `https://crossway.cache/wallets/${wallet.toLowerCase()}`;
-  if (!fresh) {
-    const hit = await cache.match(key);
-    if (hit) return hit.json();
-  }
+export async function loadWalletHome(env: Env, wallet: string) {
   const me = wallet.toLowerCase();
   const wanted = new Set([env.USDC.toLowerCase(), env.EURC.toLowerCase()]);
   const [acct, tokens, transfers, logs] = await Promise.all([
-    scanGet<{ coin_balance?: string }>(`/addresses/${wallet}`, ttl),
-    scanGet<TokenBal[]>(`/addresses/${wallet}/token-balances`, ttl),
-    scanGet<{ items?: Transfer[] }>(`/addresses/${wallet}/token-transfers`, ttl),
-    contractLogs(env, ttl),
+    scan<{ coin_balance?: string }>(env, `/addresses/${wallet}`),
+    scan<TokenBal[]>(env, `/addresses/${wallet}/token-balances`),
+    scan<{ items?: Transfer[] }>(env, `/addresses/${wallet}/token-transfers?type=ERC-20`),
+    contractLogs(env),
   ]);
   const list = Array.isArray(tokens) ? tokens : [];
   const pick = (addr: string) => list.find((t) => t.token?.address_hash?.toLowerCase() === addr.toLowerCase());
@@ -105,7 +102,12 @@ export async function loadWalletHome(env: Env, wallet: string, fresh = false) {
       eurc: units(eurc?.value ?? "0", Number(eurc?.token?.decimals ?? 6)),
     },
     activity: (transfers.items ?? [])
-      .filter((row) => wanted.has(row.token?.address_hash?.toLowerCase() ?? ""))
+      .filter((row) => {
+        if (!wanted.has(row.token?.address_hash?.toLowerCase() ?? "")) return false;
+        const feeTo = env.FEE_TO?.toLowerCase();
+        if (!feeTo) return true;
+        return (row.to?.hash ?? "").toLowerCase() !== feeTo && (row.from?.hash ?? "").toLowerCase() !== feeTo;
+      })
       .slice(0, 20)
       .map((row) => {
         const from = row.from?.hash ?? "";
@@ -128,9 +130,6 @@ export async function loadWalletHome(env: Env, wallet: string, fresh = false) {
       }),
     invoices: invoicesFor(env, logs, wallet),
   };
-  if (!fresh) {
-    await cache.put(key, new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=12" } }));
-  }
   return data;
 }
 
@@ -206,8 +205,8 @@ export async function loadInvoice(env: Env, id: string) {
   };
 }
 
-export async function invoiceIdFromTx(hash: string) {
-  const page = await scanGet<{ items?: Log[] }>(`/transactions/${hash}/logs`, 0);
+export async function invoiceIdFromTx(env: Env, hash: string) {
+  const page = await scan<{ items?: Log[] }>(env, `/transactions/${hash}/logs`);
   const log = (page.items ?? []).find((item) => item.topics?.[0]?.toLowerCase() === TOPICS.created);
   if (!log?.topics?.[1]) return null;
   return BigInt(log.topics[1]).toString();

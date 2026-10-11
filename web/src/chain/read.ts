@@ -34,18 +34,17 @@ const memo = new Map<string, { at: number; data: WalletHome }>();
 
 function loadWallet(wallet: Address, fresh = false) {
   const key = wallet.toLowerCase();
-  if (!fresh) {
-    const hit = memo.get(key);
-    if (hit && Date.now() - hit.at < 8000) return Promise.resolve(hit.data);
-    const pending = inflight.get(key);
-    if (pending) return pending;
-  }
+  const hit = memo.get(key);
+  if (!fresh && hit && Date.now() - hit.at < 45_000) return Promise.resolve(hit.data);
+  const pending = inflight.get(key);
+  if (pending) return pending;
   const p = request<WalletHome>(`/v1/wallets/${wallet}${fresh ? "?fresh=1" : ""}`).then((data) => {
     memo.set(key, { at: Date.now(), data });
     return data;
   });
   inflight.set(key, p);
   p.finally(() => inflight.delete(key));
+  if (!fresh && hit) return Promise.resolve(hit.data);
   return p;
 }
 

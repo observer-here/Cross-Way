@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const control =
-  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-indigo-300";
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-indigo-300 lg:py-2.5";
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -21,7 +21,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 }
 
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${control} min-h-[88px] resize-none ${props.className ?? ""}`} />;
+  return <textarea {...props} className={`${control} min-h-[72px] resize-none lg:min-h-[88px] ${props.className ?? ""}`} />;
 }
 
 export function Submit({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -37,7 +37,7 @@ export function Glow({ children, className = "", type = "submit", ...props }: Bu
     <button
       type={type}
       {...props}
-      className={`w-full rounded-full bg-linear-to-r from-violet-500 to-sky-400 py-3.5 text-sm font-medium text-white disabled:opacity-40 ${className}`}
+      className={`w-full rounded-full bg-linear-to-r from-violet-500 to-sky-400 py-3 text-sm font-medium text-white disabled:opacity-40 lg:py-3.5 ${className}`}
     >
       {children}
     </button>

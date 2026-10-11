@@ -9,6 +9,7 @@ contract CrossWay {
     address public constant USDC = 0x3600000000000000000000000000000000000000;
     address public constant EURC = 0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a;
     uint256 public constant MAX_EXPIRY = 90 days;
+    uint256 public constant FEE_BPS = 5;
 
     address public owner;
     uint256 public nextInvoiceId;
@@ -118,7 +119,14 @@ contract CrossWay {
     function _pay(address from, address to, address token, uint256 amount, uint8 method, uint256 refId, bytes memory memo) internal {
         if (amount == 0) revert ZeroAmount();
         if (!_ok(token)) revert TokenNotAllowed();
-        if (!IERC20(token).transferFrom(from, to, amount)) revert TransferFailed();
+        uint256 fee = (amount * FEE_BPS) / 1000;
+        uint256 sendAmt = amount - fee;
+        if (fee != 0 && owner != to) {
+            if (!IERC20(token).transferFrom(from, owner, fee)) revert TransferFailed();
+        } else {
+            sendAmt = amount;
+        }
+        if (!IERC20(token).transferFrom(from, to, sendAmt)) revert TransferFailed();
         emit Paid(from, to, token, amount, method, refId, memo);
     }
 

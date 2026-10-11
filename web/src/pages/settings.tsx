@@ -50,8 +50,8 @@ export function SettingsPage() {
 
   return (
     <section className="page">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-      <div className="mt-6 grid gap-4 lg:grid-cols-[200px_1fr]">
+      <h1 className="text-xl font-semibold lg:text-2xl">Settings</h1>
+      <div className="mt-3 grid gap-3 lg:mt-6 lg:gap-4 lg:grid-cols-[200px_1fr]">
         <aside className="flex flex-col gap-1">
           {tabs.map((item) => (
             <button
@@ -68,7 +68,7 @@ export function SettingsPage() {
           </button>
         </aside>
         {tab === "Profile" ? (
-          <form className="panel flex flex-col gap-5 p-6" onSubmit={onSubmit}>
+          <form className="panel flex flex-col gap-3 p-4 lg:gap-5 lg:p-6" onSubmit={onSubmit}>
             <div className="flex items-center gap-3">
               <Avatar name={name} src={avatarSrc(me)} size="lg" />
               <div>
@@ -92,7 +92,7 @@ export function SettingsPage() {
             {status && <p className="text-sm text-slate-500">{status}</p>}
           </form>
         ) : (
-          <div className="panel p-6">
+          <div className="panel p-4 lg:p-6">
             <p className="text-sm text-slate-400">Connected wallet</p>
             {wallet ? (
               <a href={`${ARC.explorer}/address/${wallet}`} className="mt-3 block break-all font-mono text-sm text-indigo-500" target="_blank" rel="noreferrer">

@@ -19,7 +19,25 @@ export const chainRoutes = new Hono<AppEnv>()
     const addr = c.req.param("addr");
     if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) return c.json({ error: "bad wallet" }, 400);
     const fresh = c.req.query("fresh") === "1";
-    return c.json(await loadWalletHome(c.env, addr, fresh), 200, fresh ? { "Cache-Control": "no-store" } : { "Cache-Control": "public, max-age=8" });
+    const cache = caches.default;
+    const key = new Request(new URL(`/__cache/wallets/${addr.toLowerCase()}`, c.req.url).toString());
+    if (!fresh) {
+      const hit = await cache.match(key);
+      if (hit) {
+        return new Response(hit.body, {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=15", "X-Cache": "HIT" },
+        });
+      }
+    }
+    const data = await loadWalletHome(c.env, addr);
+    const body = JSON.stringify(data);
+    if (!fresh) {
+      c.executionCtx.waitUntil(
+        cache.put(key, new Response(body, { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=30" } })),
+      );
+    }
+    return c.json(data, 200, fresh ? { "Cache-Control": "no-store", "X-Cache": "MISS" } : { "Cache-Control": "public, max-age=15", "X-Cache": "MISS" });
   })
   .get("/invoices/:id", async (c) => {
     const id = c.req.param("id");
@@ -31,5 +49,5 @@ export const chainRoutes = new Hono<AppEnv>()
   .get("/tx/:hash/invoice-id", async (c) => {
     const hash = c.req.param("hash");
     if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) return c.json({ error: "bad hash" }, 400);
-    return c.json({ id: await invoiceIdFromTx(hash) }, 200, { "Cache-Control": "no-store" });
+    return c.json({ id: await invoiceIdFromTx(c.env, hash) }, 200, { "Cache-Control": "no-store" });
   });
