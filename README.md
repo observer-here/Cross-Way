@@ -4,45 +4,62 @@
 
 # Cross Way
 
-**Send. Receive. Anyone. Anywhere.**
+**⚡ Send. Receive. Anyone. Anywhere. 🌍**
 
-A stablecoin payments app on [Arc](https://docs.arc.io).
+A stablecoin payments app on [Arc](https://docs.arc.io) 💸
 Sign in with an email, get a wallet automatically, and pay anyone by username, email, EVM address or user ID, in USDC or EURC.
 
-[GitHub](https://github.com/observer-here/Cross-Way) ·
-[Arc Docs](https://docs.arc.io) ·
-[Arc Explorer](https://explorer.arc.io) ·
-[Contract](https://explorer.arc.io/address/0x7574a58077eDaC8B48FD7D07B1dB16b8FB347c84)
+![Network](https://img.shields.io/badge/Network-Arc%20Mainnet-4f46e5?style=for-the-badge&logo=ethereum&logoColor=white)
+![Chain ID](https://img.shields.io/badge/Chain%20ID-5042-7c3aed?style=for-the-badge)
+![USDC](https://img.shields.io/badge/USDC-supported-2775ca?style=for-the-badge)
+![EURC](https://img.shields.io/badge/EURC-supported-0ea5e9?style=for-the-badge)
+![Fee](https://img.shields.io/badge/Fee-0.5%25-10b981?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Contract%20tests-2%20passing-22c55e?style=for-the-badge)
+
+![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6-646cff?style=flat-square&logo=vite&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=flat-square&logo=solidity&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?style=flat-square&logo=cloudflare&logoColor=white)
+![Hono](https://img.shields.io/badge/Hono-4-e36002?style=flat-square)
+![Privy](https://img.shields.io/badge/Auth-Privy-676fff?style=flat-square)
+![Vercel](https://img.shields.io/badge/Web-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
+
+[🐙 GitHub](https://github.com/observer-here/Cross-Way) ·
+[📚 Arc Docs](https://docs.arc.io) ·
+[🔎 Arc Explorer](https://explorer.arc.io) ·
+[📜 Contract](https://explorer.arc.io/address/0x7574a58077eDaC8B48FD7D07B1dB16b8FB347c84)
 
 </div>
 
 ---
 
-## Table of contents
+## 🧭 Table of contents
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [How it works](#how-it-works)
-4. [Architecture](#architecture)
-5. [Tech stack](#tech-stack)
-6. [Network and addresses](#network-and-addresses)
-7. [Project structure](#project-structure)
-8. [Smart contract](#smart-contract)
-9. [Backend](#backend)
-10. [Frontend](#frontend)
-11. [Environment variables](#environment-variables)
-12. [Getting started](#getting-started)
-13. [Testing](#testing)
-14. [Deployment](#deployment)
-15. [Operations and troubleshooting](#operations-and-troubleshooting)
-16. [Known limitations](#known-limitations)
-17. [Security](#security)
-18. [Contributing](#contributing)
-19. [Links](#links)
+1. [📖 Overview](#-overview)
+2. [✨ Features](#-features)
+3. [🔄 How it works](#-how-it-works)
+4. [🧱 Architecture](#-architecture)
+5. [🧰 Tech stack](#-tech-stack)
+6. [🌐 Network and addresses](#-network-and-addresses)
+7. [📁 Project structure](#-project-structure)
+8. [📜 Smart contract](#-smart-contract)
+9. [🔌 Backend](#-backend)
+10. [🎨 Frontend](#-frontend)
+11. [🔑 Environment variables](#-environment-variables)
+12. [🚀 Getting started](#-getting-started)
+13. [🧪 Testing](#-testing)
+14. [📦 Deployment](#-deployment)
+15. [🩺 Operations and troubleshooting](#-operations-and-troubleshooting)
+16. [🚧 Known limitations](#-known-limitations)
+17. [🔒 Security](#-security)
+18. [🤝 Contributing](#-contributing)
+19. [🔗 Links](#-links)
 
 ---
 
-## Overview
+## 📖 Overview
 
 Cross Way makes paying someone as simple as knowing their username or email.
 
@@ -52,9 +69,9 @@ Cross Way makes paying someone as simple as knowing their username or email.
 - A single smart contract handles direct payments, payment requests and shareable payment links, and takes a **0.5% fee** on every payment.
 - Funds never sit in the contract. They move straight from the payer's wallet to the recipient using `transferFrom`.
 
-## Features
+## ✨ Features
 
-### Payments
+### 💸 Payments
 - **Send** to a username, email, EVM address or user ID, with a recent-people list and a review step before confirming.
 - **Request** money from a specific person. Only that person's wallet can pay the request.
 - **Payment links** that anyone with an account can open and pay.
@@ -63,54 +80,64 @@ Cross Way makes paying someone as simple as knowing their username or email.
 - **Messages** of up to 200 characters attached to a payment, stored on-chain with the transaction.
 - **Fee preview** (platform fee and what the recipient gets) shown before you confirm.
 
-### QR codes
+### 📱 QR codes
 - **My code** shows your own QR (a link to the Send page prefilled with your wallet), with a USDC/EURC toggle.
 - **Scan** opens the camera and decodes QR codes live. It also accepts an uploaded image as a fallback.
 - Scanned wallet addresses open Send, and scanned payment links open the Pay page.
 - The app logo sits in the centre of every generated QR.
 
-### Account
+### 👤 Account
 - Automatic profile creation on first login (username, user ID, wallet, email).
 - Editable username (3 to 48 characters: lowercase letters, numbers and underscore).
 - Avatar upload (JPEG, PNG or WebP, up to 400 KB).
 - Wallet address with a link to the explorer.
 
-### Dashboard and history
+### 📊 Dashboard and history
 - USDC and EURC balances with skeleton loaders while data loads.
 - **Recent activity** (4 items) and **pending requests** on the home screen.
 - Full **history** with pagination, and a **transaction detail** page for each payment.
 - Local-time formatting and statuses for requests: Pending, Completed, Expired, Cancelled.
 
-### Interface
+### 🌗 Interface
 - Light and dark themes, with no flash of the wrong theme on reload.
 - Mobile-first layout that has been checked at 320 px up to 1440 px, with long addresses, messages and error text wrapping instead of overflowing.
 - No flash of unstyled background on refresh (the page gradient is inlined in `index.html`).
 
-## How it works
+## 🔄 How it works
 
-### 1. Login and profile
+### 1️⃣ Login and profile
 1. The user enters an email on `/login`, and Privy sends a one-time code.
 2. Privy creates an embedded Ethereum wallet for the user.
 3. The web app sends the Privy access token to `GET /v1/me`.
 4. On a first login the API returns `404`, so the app calls `POST /v1/me`. The Worker verifies the token, reads the user's email and wallet from the Privy API, and creates the profile with a generated username and user ID.
 
-### 2. Sending money
+### 2️⃣ Sending money
 1. The user types a recipient. A username, email or user ID is resolved to a wallet through `GET /v1/lookup`. A raw `0x` address is used as-is.
 2. The wallet sends an ERC-20 **`approve`** for exactly the amount.
 3. The wallet calls **`sendToAddress`** on the CrossWay contract.
 4. The contract takes 0.5% to the owner and sends the rest to the recipient in the same transaction.
 5. The app refreshes balances and activity about 3 seconds later.
 
-### 3. Requests and links
+### 3️⃣ Requests and links
 1. The payee calls `createRequest` (for a named payer) or `createLink` (open to anyone). The contract stores an invoice and emits `InvoiceCreated`.
 2. The app waits for the new invoice ID (`GET /v1/tx/:hash/invoice-id`) and shows the share link `/pay/<id>`.
 3. The payer opens the link, the app reads the invoice (`GET /v1/invoices/:id`), approves the amount and calls `pay`.
 4. The invoice is deleted on payment, and a `Paid` event records who paid whom.
 
-### Fee example
-Sending **10.00 USDC**: the recipient receives **9.95 USDC**, the owner receives **0.05 USDC**, and the sender pays exactly **10.00 USDC** plus network gas. If the recipient is the owner, no fee is taken.
+### 💰 Fee example
 
-## Architecture
+Sending **10.00 USDC** costs the sender exactly 10.00 USDC plus network gas:
+
+```diff
+- sender pays          10.00 USDC
++ recipient receives    9.95 USDC   (99.5%)
+! platform fee          0.05 USDC   (0.5%, goes to the contract owner)
+```
+
+> [!TIP]
+> If the recipient is the owner, no fee is taken.
+
+## 🧱 Architecture
 
 ```
 ┌────────────────────────────┐
@@ -144,7 +171,7 @@ Sending **10.00 USDC**: the recipient receives **9.95 USDC**, the owner receives
 - **Reads** for balances, activity and invoices go through the Worker so the browser makes one call and results can be cached.
 - **Identity** (username, email, user ID to wallet) lives only in D1. The contract knows only addresses.
 
-## Tech stack
+## 🧰 Tech stack
 
 | Layer | Tools |
 |---|---|
@@ -155,7 +182,7 @@ Sending **10.00 USDC**: the recipient receives **9.95 USDC**, the owner receives
 | Contracts | Solidity 0.8.28, Hardhat, ethers v6, Chai |
 | Chain | Arc Mainnet (USDC native gas, sub-second blocks) |
 
-## Network and addresses
+## 🌐 Network and addresses
 
 | | |
 |---|---|
@@ -171,9 +198,10 @@ Sending **10.00 USDC**: the recipient receives **9.95 USDC**, the owner receives
 | Contract owner and fee wallet | `0xA7b4c3A498B7FE206fCD3888bDe6b72264729f4a` |
 | API | `https://crossway-api.dartajamul108.workers.dev` |
 
-Arc's base fee is currently 20 gwei, and the app sends transactions with a 20 gwei max fee. Deploying the contract cost roughly 0.02 USDC.
+> [!NOTE]
+> Arc's base fee is currently 20 gwei, and the app sends transactions with a 20 gwei max fee. Deploying the contract cost roughly 0.02 USDC.
 
-## Project structure
+## 📁 Project structure
 
 ```
 .
@@ -213,7 +241,7 @@ Arc's base fee is currently 20 gwei, and the app sends transactions with a 20 gw
         └── theme.tsx            Light and dark theme
 ```
 
-## Smart contract
+## 📜 Smart contract
 
 `contracts/src/CrossWay.sol` is a small, dependency-free contract. USDC and EURC are hardcoded as allowed tokens, and the owner can allow extra tokens.
 
@@ -252,7 +280,7 @@ The backend derives invoice state from these events, since paid and cancelled in
 ### Errors
 `NotOwner`, `Reentrant`, `ZeroAmount`, `ZeroAddress`, `TokenNotAllowed`, `BadExpiry`, `Closed`, `NotSender`, `NotDue`, `NotPayer`, `TransferFailed`, `NativeDisabled`.
 
-## Backend
+## 🔌 Backend
 
 A single Cloudflare Worker serves the API under `/v1`. Errors are always JSON in the form `{ "error": "message" }`.
 
@@ -295,7 +323,7 @@ Avatars are stored alongside the user row (migration `0002`). Usernames are assi
 - **Invoices:** the explorer API's logs for the CrossWay contract, decoded into created, paid and cancelled states.
 - The explorer API sits behind Cloudflare bot protection, so the Worker sends the explorer's own `Origin` and `Referer` headers on those requests (`modules/chain/scan.ts`).
 
-## Frontend
+## 🎨 Frontend
 
 ### Routes
 
@@ -322,7 +350,7 @@ Avatars are stored alongside the user row (migration `0002`). Usernames are assi
 - **Theming:** the page background gradient lives only in `web/index.html` so it paints before JavaScript loads. Dark mode adds a `dark` class to `<html>`.
 - **Layout safety:** a global rule keeps grid columns shrinkable so long content never forces a horizontal scroll.
 
-## Environment variables
+## 🔑 Environment variables
 
 ### `web/.env`
 
@@ -356,7 +384,7 @@ Avatars are stored alongside the user row (migration `0002`). Usernames are assi
 | `ARC_RPC_URL` | RPC URL (defaults to the Arc mainnet primary RPC) |
 | `PRIVATE_KEY` | Deployer private key. The wallet needs a little USDC for gas. |
 
-## Getting started
+## 🚀 Getting started
 
 **Requirements:** Node.js 20 or newer, a [Privy](https://dashboard.privy.io) app (email login enabled and embedded wallets set to create on login), and a [Cloudflare](https://dash.cloudflare.com) account for the backend.
 
@@ -408,14 +436,14 @@ npm test
 | `contracts` | `npm test` | Run the contract tests |
 | `contracts` | `npm run deploy` | Deploy to Arc Mainnet |
 
-## Testing
+## 🧪 Testing
 
 - **Contracts:** `cd contracts && npm test` runs Hardhat tests that cover the 0.5% fee on direct sends, requests, payment links, the `NotPayer` and `Closed` reverts, and cancelling.
 - **Type checks:** run `npx tsc --noEmit` in `web` and in `backend`.
 - **Build:** `npm run build` in `web` must pass before deploying.
 - **Manual checks:** after any change to the layout, check the Send review step at 320 px with a long message and a full address.
 
-## Deployment
+## 📦 Deployment
 
 ### Contract (Arc Mainnet)
 1. Copy `contracts/.env.example` to `contracts/.env` and set `PRIVATE_KEY`.
@@ -452,7 +480,7 @@ curl https://<your-worker>.workers.dev/v1/health
 - Add your site's domain to the allowed origins.
 - Arc Mainnet (chain ID `5042`) is configured in code, so no custom chain setup is needed.
 
-## Operations and troubleshooting
+## 🩺 Operations and troubleshooting
 
 | Symptom | Likely cause and fix |
 |---|---|
@@ -465,7 +493,7 @@ curl https://<your-worker>.workers.dev/v1/health
 | Camera scan does not start | Browsers only allow camera access on HTTPS (or `localhost`) and after the user grants permission. |
 | Local API errors about the database | Run `npm run db:local` in `backend/` first. |
 
-## Known limitations
+## 🚧 Known limitations
 
 - **Two transactions per payment.** The wallet approves the exact amount, then calls the contract.
 - **Explorer dependency.** Activity and invoice data come from the Arc explorer API, which sits behind bot protection. A dedicated indexer (for example Alchemy's Data API) would be more robust for production.
@@ -475,16 +503,22 @@ curl https://<your-worker>.workers.dev/v1/health
 - **Users must have logged in once** before they can be found by username, email or user ID. Anyone can still be paid by raw address.
 - **Only Ethereum embedded wallets** are supported, and email is the only login method.
 
-## Security
+## 🔒 Security
 
 - Private keys and secrets live only in gitignored files (`.env`, `.dev.vars`) and Worker secrets. Never commit them.
 - The API never signs transactions. Users approve every payment in their own wallet.
 - Approvals are for the exact payment amount, not unlimited.
 - The deployer wallet receives all fees and can change the owner and allowed tokens. Use a dedicated wallet and store its key safely.
-- The contract has not been through an external audit. Treat it accordingly, and start with small amounts on mainnet.
 - To lock down CORS, set `FRONTEND_ORIGIN` in `wrangler.toml` to your site's URL.
 
-## Contributing
+> [!WARNING]
+> The contract has not been through an external audit, and Arc is a live mainnet with real money. Start with small amounts.
+
+> [!CAUTION]
+> Never commit `contracts/.env`. It holds the deployer private key that controls the fee wallet.
+- To lock down CORS, set `FRONTEND_ORIGIN` in `wrangler.toml` to your site's URL.
+
+## 🤝 Contributing
 
 1. Fork the repository and create a branch from `main`.
 2. Keep changes small and focused, and remove any code you made unused.
@@ -493,7 +527,7 @@ curl https://<your-worker>.workers.dev/v1/health
 
 Found a bug or have an idea? [Open an issue](https://github.com/observer-here/Cross-Way/issues).
 
-## Links
+## 🔗 Links
 
 <div align="center">
 
