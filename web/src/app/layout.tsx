@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 
 import { avatarSrc } from "@/api/users";
 import { useSession } from "@/auth/session";
+import { ARC } from "@/chain/arc";
 import { labelOf } from "@/lib/format";
 import { Avatar } from "@/shared/ui/avatar";
 import { Logo } from "@/shared/ui/logo";
@@ -41,7 +42,7 @@ export function Layout() {
           <ThemeToggle />
           <span className="hidden items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm text-slate-600 shadow-sm sm:flex">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Arc Testnet
+            {ARC.name}
             <Caret />
           </span>
           <NavLink to="/settings" className="flex shrink-0 items-center gap-1.5 rounded-full bg-white py-0.5 pr-2.5 pl-0.5 shadow-sm lg:gap-2 lg:py-1 lg:pr-3 lg:pl-1">

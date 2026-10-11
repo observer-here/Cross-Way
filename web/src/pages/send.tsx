@@ -80,7 +80,7 @@ export function SendPage() {
           </div>
           <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
             <Row label="Amount" value={`${amount} ${token}`} />
-            <Row label="Network" value="Arc Testnet" />
+            <Row label="Network" value={ARC.name} />
             <Row label="Tx Hash" value={shortAddress(hash)} />
           </dl>
         </div>
@@ -115,7 +115,7 @@ export function SendPage() {
               </ReviewRow>
               <ReviewRow label="Token" tone="bg-indigo-50 text-indigo-500" icon="M12 3c4 0 7 1.2 7 3s-3 3-7 3-7-1.2-7-3 3-3 7-3zm-7 5.5V12c0 1.8 3 3 7 3s7-1.2 7-3V8.5M5 12.5V16c0 1.8 3 3 7 3s7-1.2 7-3v-3.5" onEdit={() => setStep("form")} value={token} />
               <ReviewRow label="Amount" tone="bg-sky-50 text-sky-500" icon="M12 3v18M17 8c0-2-2.2-3.5-5-3.5S7 6 7 8s2 3 5 3 5 1.2 5 3-2.2 3.5-5 3.5S7 16 7 14" onEdit={() => setStep("form")} value={`${amount} ${token}`} />
-              <ReviewRow label="Network" tone="bg-emerald-50 text-emerald-500" icon="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18" value="Arc Testnet" sub="ERC-20" />
+              <ReviewRow label="Network" tone="bg-emerald-50 text-emerald-500" icon="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18" value={ARC.name} sub="ERC-20" />
               {memo && <ReviewRow label="Message" tone="bg-orange-50 text-orange-400" icon="M5 5h14v10H8l-3 3V5z" onEdit={() => setStep("form")} value={memo} />}
             </dl>
             <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-3 text-sm">

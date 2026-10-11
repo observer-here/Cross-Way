@@ -7,7 +7,7 @@ interface IERC20 {
 
 contract CrossWay {
     address public constant USDC = 0x3600000000000000000000000000000000000000;
-    address public constant EURC = 0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a;
+    address public constant EURC = 0xbEf5f6d51CB62b58e6A8f77868681825C6fe21c1;
     uint256 public constant MAX_EXPIRY = 90 days;
     uint256 public constant FEE_BPS = 5;
 

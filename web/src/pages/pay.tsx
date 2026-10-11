@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useSession } from "@/auth/session";
+import { ARC } from "@/chain/arc";
 import { loadInvoice } from "@/chain/read";
 import { cancelInvoice, payInvoice } from "@/chain/write";
 import { useArcWallet } from "@/chain/wallet";
@@ -64,7 +65,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
           {invoice.memo && <p className="mt-2 text-sm break-words text-slate-400">{invoice.memo}</p>}
           <div className="mt-5 flex gap-2">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">{invoice.token}</span>
-            <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs text-indigo-500">Arc Testnet</span>
+            <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs text-indigo-500">{ARC.name}</span>
           </div>
         </div>
         <div>
@@ -93,7 +94,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
             </div>
             <div className="flex justify-between">
               <dt className="text-slate-400">Network</dt>
-              <dd>Arc Testnet</dd>
+              <dd>{ARC.name}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-slate-400">Status</dt>

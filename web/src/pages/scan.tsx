@@ -155,7 +155,7 @@ function MyCode() {
         <p className="font-semibold">Receive to</p>
         <p className="mt-3 text-slate-500">USDC / EURC</p>
         <p className="mt-6 font-semibold">Network</p>
-        <p className="mt-2 text-slate-500">Arc Testnet</p>
+        <p className="mt-2 text-slate-500">{ARC.name}</p>
         <a href={`${ARC.explorer}/address/${wallet}`} className="mt-6 block text-xs text-indigo-500" target="_blank" rel="noreferrer">
           {shortAddress(wallet)}
         </a>

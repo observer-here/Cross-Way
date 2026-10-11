@@ -7,9 +7,9 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {},
-    arcTestnet: {
-      url: process.env.ARC_TESTNET_RPC_URL || "https://rpc.testnet.arc.io",
-      chainId: 5042002,
+    arc: {
+      url: process.env.ARC_RPC_URL || "https://rpc.mainnet.arc.io",
+      chainId: 5042,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
   },

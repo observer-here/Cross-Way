@@ -4,7 +4,7 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.ts --network arcTestnet"
+    "deploy": "hardhat run scripts/deploy.ts --network arc"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",

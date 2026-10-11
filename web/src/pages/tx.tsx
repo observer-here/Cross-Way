@@ -40,7 +40,7 @@ export function TxPage() {
           <Row label="Date" value={shortTime(tx.ts)} />
           <Row label="From" value={shortAddress(tx.from)} />
           <Row label="To" value={shortAddress(tx.to)} />
-          <Row label="Network" value="Arc Testnet" />
+          <Row label="Network" value={ARC.name} />
           <Row label="Token" value={tx.token} />
           <div className="flex justify-between gap-4">
             <dt className="text-slate-400">Transaction Hash</dt>

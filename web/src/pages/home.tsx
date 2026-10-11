@@ -2,6 +2,7 @@ import { Actions } from "@/features/dashboard/actions";
 import { Activity } from "@/features/dashboard/activity";
 import { Balance } from "@/features/dashboard/balance";
 import { useSession } from "@/auth/session";
+import { ARC } from "@/chain/arc";
 import { labelOf } from "@/lib/format";
 
 export function HomePage() {
@@ -16,7 +17,7 @@ export function HomePage() {
       ) : (
         <span className="skel mt-1.5 h-10 w-52 rounded-lg sm:h-12 sm:w-72 lg:h-14 lg:w-80" />
       )}
-      <p className="mt-1.5 text-xs text-slate-500 lg:mt-3 lg:text-sm">Send, receive and manage your payments on Arc Testnet.</p>
+      <p className="mt-1.5 text-xs text-slate-500 lg:mt-3 lg:text-sm">Send, receive and manage your payments on {ARC.name}.</p>
       <div className="mt-4 lg:mt-8">
         <Actions />
       </div>

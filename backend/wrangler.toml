@@ -4,13 +4,13 @@ compatibility_date = "2026-10-09"
 
 [vars]
 FRONTEND_ORIGIN = "*"
-CONTRACT_ADDRESS = "0xA10c2Cb1C8CD60409d2322A2f532b7F03ee2B6fc"
-ARCSCAN_URL = "https://explorer.testnet.arc.io/api/v2"
+CONTRACT_ADDRESS = "0x7574a58077eDaC8B48FD7D07B1dB16b8FB347c84"
+ARCSCAN_URL = "https://explorer.arc.io/api/v2"
 USDC = "0x3600000000000000000000000000000000000000"
-EURC = "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a"
+EURC = "0xbEf5f6d51CB62b58e6A8f77868681825C6fe21c1"
 FEE_TO = "0xA7b4c3A498B7FE206fCD3888bDe6b72264729f4a"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "crossway"
-database_id = "affc6ca5-46e6-465d-a329-b63cff9fb388"
+database_id = "c6d38102-ced5-4ac5-a258-06ce4010d176"
