@@ -1,6 +1,6 @@
-import { decodeAbiParameters, type Address, zeroAddress } from "viem";
+import { decodeAbiParameters, hexToString, type Address, type Hex, zeroAddress } from "viem";
 
-import { fromTokenAmount } from "@/lib/format";
+import { fromTokenAmount, shortTime } from "@/lib/format";
 
 import { ARC, TOKENS, TOPICS } from "./arc";
 import { scanGet } from "./scan";
@@ -42,13 +42,15 @@ export async function loadBalances(wallet: Address) {
 
 export type ActivityItem = {
   id: string;
+  hash: string;
   dir: "in" | "out";
   kind: string;
   counterparty: string;
+  from: string;
+  to: string;
   amount: string;
   token: string;
   time: string;
-  method: number;
 };
 
 const wanted = new Set([TOKENS.USDC.address.toLowerCase(), TOKENS.EURC.address.toLowerCase()]);
@@ -66,13 +68,15 @@ export async function loadActivity(wallet: Address): Promise<ActivityItem[]> {
       const decimals = Number(row.total?.decimals ?? row.token?.decimals ?? 6);
       return {
         id: `${row.transaction_hash}-${from}-${to}`,
+        hash: row.transaction_hash,
         dir,
         kind: row.method || (dir === "out" ? "Sent" : "Received"),
         counterparty: dir === "out" ? to : from,
+        from,
+        to,
         amount: fromTokenAmount(BigInt(row.total?.value ?? "0"), decimals),
         token: row.token?.symbol ?? "USDC",
-        time: row.timestamp ? new Date(row.timestamp).toLocaleString() : "",
-        method: 0,
+        time: shortTime(row.timestamp),
       };
     });
 }
@@ -116,11 +120,13 @@ export async function loadInvoice(id: bigint) {
   let tokenAddr = TOKENS.USDC.address as Address;
   let amount = 0n;
   let expiresAt = 0;
+  let memo = "";
   const p = params(created);
   if (p.token || p.amount) {
     tokenAddr = ((p.token as Address) || tokenAddr) as Address;
     amount = BigInt(p.amount ?? "0");
     expiresAt = Number(p.expiresAt ?? 0);
+    memo = p.memo ?? "";
   } else if (created.data && created.data !== "0x") {
     const decoded = decodeAbiParameters(
       [{ type: "bytes32" }, { type: "address" }, { type: "uint256" }, { type: "uint64" }, { type: "bytes" }],
@@ -129,6 +135,11 @@ export async function loadInvoice(id: bigint) {
     tokenAddr = decoded[1];
     amount = decoded[2];
     expiresAt = Number(decoded[3]);
+    try {
+      memo = hexToString(decoded[4] as Hex);
+    } catch {
+      memo = "";
+    }
   }
   if (payee === zeroAddress) return null;
   const cancelled = logs.some(
@@ -154,6 +165,78 @@ export async function loadInvoice(id: bigint) {
     amount: fromTokenAmount(amount, 6),
     rawAmount: amount,
     expiresAt,
+    memo,
     closed: cancelled || paid,
   };
+}
+
+export async function loadTx(hash: string, wallet: Address) {
+  const rows = await loadActivity(wallet);
+  return rows.find((row) => row.hash.toLowerCase() === hash.toLowerCase()) ?? null;
+}
+
+export type InvoiceRow = {
+  id: string;
+  amount: string;
+  token: string;
+  status: "Pending" | "Completed" | "Expired";
+  time: string;
+  counterparty: string;
+};
+
+export async function loadMyInvoices(wallet: Address): Promise<InvoiceRow[]> {
+  const page = await scanGet<{ items?: ScanLog[] }>(`/addresses/${ARC.contract}/logs`);
+  const logs = page.items ?? [];
+  const me = wallet.toLowerCase().slice(2);
+  const mine = logs.filter((item) => {
+    const t = item.topics ?? [];
+    return t[0]?.toLowerCase() === TOPICS.INVOICE_CREATED && (t[2] ?? "").toLowerCase().endsWith(me);
+  });
+  return mine.slice(0, 8).map((log) => {
+    const id = BigInt(log.topics?.[1] ?? "0").toString();
+    const padded = topicId(BigInt(id));
+    const payer = (`0x${(log.topics?.[3] ?? "").slice(-40)}` as string) || "";
+    let tokenAddr: Address = TOKENS.USDC.address;
+    let amount = 0n;
+    let expiresAt = 0;
+    const p = params(log);
+    if (p.amount) {
+      tokenAddr = (p.token as Address) || tokenAddr;
+      amount = BigInt(p.amount);
+      expiresAt = Number(p.expiresAt ?? 0);
+    } else if (log.data && log.data !== "0x") {
+      const decoded = decodeAbiParameters(
+        [{ type: "bytes32" }, { type: "address" }, { type: "uint256" }, { type: "uint64" }, { type: "bytes" }],
+        log.data as `0x${string}`,
+      );
+      tokenAddr = decoded[1];
+      amount = decoded[2];
+      expiresAt = Number(decoded[3]);
+    }
+    const paid = logs.some((item) => {
+      if (item.topics?.[0]?.toLowerCase() !== TOPICS.PAID) return false;
+      const d = params(item);
+      if (d.refId) return d.refId === id;
+      if (!item.data || item.data === "0x") return false;
+      const decoded = decodeAbiParameters(
+        [{ type: "uint256" }, { type: "bytes32" }, { type: "uint8" }, { type: "uint256" }, { type: "bytes" }],
+        item.data as `0x${string}`,
+      );
+      return decoded[3].toString() === id;
+    });
+    const cancelled = logs.some(
+      (item) => item.topics?.[0]?.toLowerCase() === TOPICS.INVOICE_CANCELLED && item.topics?.[1]?.toLowerCase() === padded,
+    );
+    const expired = expiresAt > 0 && Date.now() / 1000 > expiresAt;
+    const status: InvoiceRow["status"] = paid || cancelled ? "Completed" : expired ? "Expired" : "Pending";
+    const token = tokenAddr.toLowerCase() === TOKENS.EURC.address.toLowerCase() ? "EURC" : "USDC";
+    return {
+      id,
+      amount: fromTokenAmount(amount, 6),
+      token,
+      status,
+      time: shortTime(log.timestamp),
+      counterparty: payer,
+    };
+  });
 }

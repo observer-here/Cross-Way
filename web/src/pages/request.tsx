@@ -1,57 +1,110 @@
-import { useState, type FormEvent } from "react";
+import { isAddress, zeroAddress } from "viem";
+import { useEffect, useState, type FormEvent } from "react";
 
-import { waitInvoiceId } from "@/chain/read";
+import { useSession } from "@/auth/session";
+import { loadMyInvoices, waitInvoiceId, type InvoiceRow } from "@/chain/read";
 import { useArcWallet } from "@/chain/wallet";
 import { createPaymentRequest } from "@/chain/write";
-import { Field, Input, Select, Submit } from "@/shared/ui/field";
+import { personLabel, todayPlus } from "@/lib/format";
+import { DaysSelect, Field, Glow, Input, Textarea, TokenSelect } from "@/shared/ui/field";
+import { SideMark, SoftIcon } from "@/shared/ui/mark";
 
 export function RequestPage() {
-  const wallet = useArcWallet();
+  const { wallet } = useSession();
+  const signer = useArcWallet();
+  const [from, setFrom] = useState("");
+  const [amount, setAmount] = useState("");
+  const [token, setToken] = useState("USDC");
+  const [memo, setMemo] = useState("");
+  const [days, setDays] = useState("7");
   const [status, setStatus] = useState("");
+  const [rows, setRows] = useState<InvoiceRow[] | null>(null);
+
+  useEffect(() => {
+    if (!wallet) return;
+    loadMyInvoices(wallet)
+      .then(setRows)
+      .catch(() => setRows([]));
+  }, [wallet]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
     setStatus("Creating…");
     try {
-      const hash = await createPaymentRequest(
-        wallet,
-        String(fd.get("from") ?? ""),
-        String(fd.get("amount")),
-        String(fd.get("token") ?? "USDC"),
-        String(fd.get("memo") ?? ""),
-      );
+      const hash = await createPaymentRequest(signer, from, amount, token, memo, todayPlus(Number(days)));
       setStatus("Indexing…");
       const id = await waitInvoiceId(hash);
       setStatus(id ? `Pay link: ${window.location.origin}/pay/${id}` : `Created. Tx ${hash.slice(0, 10)}…`);
+      if (wallet) setRows(await loadMyInvoices(wallet).catch(() => rows));
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "failed");
     }
   }
 
   return (
-    <section className="mx-auto max-w-md px-6 py-10">
-      <h1 className="text-2xl font-semibold">Request</h1>
-      <p className="mt-1 text-sm text-slate-500">Ask for tokens, or leave From blank to make a link.</p>
-      <form className="panel mt-8 flex flex-col gap-5 p-6" onSubmit={onSubmit}>
-        <Field label="From">
-          <Input name="from" placeholder="wallet, username, or blank for a link" />
-        </Field>
-        <Field label="Amount">
-          <Input name="amount" inputMode="decimal" placeholder="0.00" required />
-        </Field>
-        <Field label="Token">
-          <Select name="token" defaultValue="USDC">
-            <option value="USDC">USDC</option>
-            <option value="EURC">EURC</option>
-          </Select>
-        </Field>
-        <Field label="Memo">
-          <Input name="memo" placeholder="optional" />
-        </Field>
-        <Submit disabled={!wallet.address}>{wallet.address ? "Create request →" : "Wallet loading…"}</Submit>
-        {status && <p className="text-sm text-slate-500">{status}</p>}
-      </form>
-    </section>
+    <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)_320px]">
+      <SideMark text="Request tokens from anyone. Easily.">
+        <SoftIcon className="bg-fuchsia-50 text-fuchsia-500">
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
+            <rect x="5" y="4" width="14" height="16" rx="2" />
+            <path d="M8 8h8M8 12h8M8 16h4" className="stroke-white" strokeWidth="1.5" fill="none" />
+          </svg>
+        </SoftIcon>
+      </SideMark>
+      <section>
+        <h1 className="text-2xl font-semibold">Request Payment</h1>
+        <p className="mt-1 text-sm text-slate-500">Create a request and let anyone pay you.</p>
+        <form className="panel mt-6 flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Amount">
+              <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" required />
+            </Field>
+            <Field label="Token">
+              <TokenSelect value={token} onChange={(e) => setToken(e.target.value)} />
+            </Field>
+          </div>
+          <Field label="Request From">
+            <Input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="username, email, EVM address or user ID" />
+          </Field>
+          {from && <p className="text-xs text-slate-400">{isAddress(from) ? from : personLabel(from)}</p>}
+          <Field label="Message (optional)">
+            <Textarea value={memo} onChange={(e) => setMemo(e.target.value)} maxLength={200} placeholder="For rent, coffee, project..." />
+          </Field>
+          <Field label="Expiry (optional)">
+            <DaysSelect value={days} onChange={(e) => setDays(e.target.value)} />
+          </Field>
+          <Glow disabled={!signer.address}>{signer.address ? "Create Request →" : "Wallet loading…"}</Glow>
+          {status && <p className="text-sm text-slate-500">{status}</p>}
+        </form>
+      </section>
+      <aside className="panel p-5">
+        <h2 className="text-sm font-semibold">Recent Requests</h2>
+        {!rows && <p className="mt-6 text-sm text-slate-400">Loading…</p>}
+        {rows && rows.length === 0 && <p className="mt-6 text-sm text-slate-400">No requests yet.</p>}
+        {rows && rows.length > 0 && (
+          <ul className="mt-3">
+            {rows.map((row) => (
+              <li key={row.id} className="flex items-center justify-between gap-3 py-2.5">
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">
+                    {row.amount} {row.token}
+                  </span>
+                  <span className="block truncate text-[11px] text-slate-400">
+                    from {row.counterparty && row.counterparty.toLowerCase() !== zeroAddress ? personLabel(row.counterparty) : "anyone"}
+                  </span>
+                  <span className="text-[11px] text-slate-400">{row.time}</span>
+                </span>
+                <Status status={row.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </aside>
+    </div>
   );
+}
+
+function Status({ status }: { status: InvoiceRow["status"] }) {
+  const tone = status === "Pending" ? "text-orange-400" : status === "Expired" ? "text-rose-400" : "text-emerald-500";
+  return <span className={`text-[11px] ${tone}`}>{status}</span>;
 }

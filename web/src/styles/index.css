@@ -25,6 +25,21 @@ textarea {
   font: inherit;
 }
 
+.page {
+  width: 100%;
+  padding: 0 1.5rem 4rem;
+}
+@media (min-width: 1024px) {
+  .page {
+    padding: 0 3rem 4rem;
+  }
+}
+@media (min-width: 1280px) {
+  .page {
+    padding: 0 4rem 4rem;
+  }
+}
+
 .panel {
   background: rgb(255 255 255 / 0.82);
   border: 1px solid rgb(255 255 255 / 0.95);

@@ -6,9 +6,19 @@ import type { LookupQuery, ProfilePatch, PublicUser, User } from "./types";
 
 const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
 const USER_ID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
+const AVATAR_MAX = 400_000;
+const AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function toPublic(user: User): PublicUser {
-  return { wallet: user.wallet, username: user.username, userId: user.user_id };
+  return {
+    id: user.id,
+    wallet: user.wallet,
+    username: user.username,
+    userId: user.user_id,
+    email: user.email,
+    has_avatar: user.has_avatar,
+    updated_at: user.updated_at,
+  };
 }
 
 function parseUsername(value: string) {
@@ -57,34 +67,38 @@ export class UsersService {
     const existing = await this.repo.byId(privy.id);
     if (existing) {
       await this.repo.saveContact(privy.id, privy.email, privy.wallet, now);
-      return { ...existing, email: privy.email, wallet: privy.wallet, updated_at: now };
+      return this.getMe(privy.id);
     }
     try {
       await this.repo.create(privy.id, privy.email, privy.wallet, now);
     } catch {
       fail(409, "email or wallet taken");
     }
-    return {
-      id: privy.id,
-      email: privy.email,
-      username: null,
-      user_id: null,
-      wallet: privy.wallet,
-      created_at: now,
-      updated_at: now,
-    };
+    return this.getMe(privy.id);
   }
 
   async updateProfile(id: string, patch: ProfilePatch) {
     const user = await this.getMe(id);
     const username = patch.username === undefined ? user.username : parseUsername(patch.username);
     const userId = patch.userId === undefined ? user.user_id : parseUserId(patch.userId);
-    const now = Date.now();
     try {
-      await this.repo.saveProfile(id, username, userId, now);
+      await this.repo.saveProfile(id, username, userId, Date.now());
     } catch {
       fail(409, "username or userId taken");
     }
-    return { ...user, username, user_id: userId, updated_at: now };
+    return this.getMe(id);
+  }
+
+  async updateAvatar(id: string, bytes: ArrayBuffer, type: string) {
+    await this.getMe(id);
+    const mime = type.split(";")[0]?.trim().toLowerCase() ?? "";
+    if (!AVATAR_TYPES.has(mime)) fail(400, "image must be jpeg, png, or webp");
+    if (bytes.byteLength < 32 || bytes.byteLength > AVATAR_MAX) fail(400, "image too large");
+    await this.repo.saveAvatar(id, bytes, mime, Date.now());
+    return this.getMe(id);
+  }
+
+  avatar(id: string) {
+    return this.repo.avatar(id);
   }
 }

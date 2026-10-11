@@ -43,18 +43,16 @@ export function LandingPage() {
 
       <section className="grid items-center gap-6 px-6 pt-8 pb-6 md:grid-cols-[1fr_1.05fr] lg:px-16 lg:pt-14">
         <div className="max-w-xl">
-          <p className="text-[11px] tracking-[0.32em] text-slate-400">PAYMENTS ON ARC</p>
+          <p className="text-[11px] tracking-[0.32em] text-slate-400">PAYMENTS MADE SIMPLE</p>
           <h1 className="mt-4 text-5xl leading-[1.05] font-extrabold tracking-tight md:text-6xl">
-            Send. Request.
+            Send. Receive.
             <br />
             <span className="bg-linear-to-r from-blue-600 to-violet-500 bg-clip-text text-transparent">Anyone. Anywhere.</span>
           </h1>
           <p className="mt-5 text-[15px] leading-7 text-slate-500">
-            CROSS WAY makes crypto payments simple.
-            <br />
             Send and receive ERC-20 tokens using a username, email,
             <br />
-            EVM address or user ID — on Arc Testnet.
+            EVM address or user ID on Arc Testnet.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/app" className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white">
@@ -192,8 +190,8 @@ function WalletIcon() {
 
 const features = [
   {
-    title: "Send to Anyone",
-    desc: "Use username, email, EVM address or user ID.",
+    title: "Send",
+    desc: "Send tokens instantly",
     bg: "bg-sky-100 text-sky-600",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
@@ -202,8 +200,8 @@ const features = [
     ),
   },
   {
-    title: "Request Payments",
-    desc: "Request tokens from anyone, easily.",
+    title: "Request",
+    desc: "Request from anyone",
     bg: "bg-fuchsia-100 text-fuchsia-500",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
@@ -213,8 +211,8 @@ const features = [
     ),
   },
   {
-    title: "Share Payment Links",
-    desc: "Generate and share payment links.",
+    title: "Payment Links",
+    desc: "Create shareable links",
     bg: "bg-emerald-100 text-emerald-600",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="2">
@@ -224,8 +222,8 @@ const features = [
     ),
   },
   {
-    title: "Scan & Pay",
-    desc: "Pay or receive with QR codes.",
+    title: "QR Pay",
+    desc: "Pay or receive via QR",
     bg: "bg-orange-100 text-orange-500",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">

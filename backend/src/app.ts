@@ -12,7 +12,7 @@ app.use("*", (c, next) =>
   cors({
     origin: c.env.FRONTEND_ORIGIN || "*",
     allowHeaders: ["Authorization", "Content-Type"],
-    allowMethods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PATCH", "PUT", "OPTIONS"],
   })(c, next),
 );
 

@@ -11,9 +11,10 @@ type Session = {
   me: User | null;
   wallet: Address | undefined;
   error: string;
+  setMe: (user: User | null) => void;
 };
 
-const Ctx = createContext<Session>({ me: null, wallet: undefined, error: "" });
+const Ctx = createContext<Session>({ me: null, wallet: undefined, error: "", setMe: () => {} });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const { ready, authenticated, getAccessToken } = usePrivy();
@@ -52,7 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     void syncIdentities(signer, me).catch(() => {});
   }, [me, signer.address]);
 
-  return <Ctx.Provider value={{ me, wallet, error }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ me, wallet, error, setMe }}>{children}</Ctx.Provider>;
 }
 
 export function useSession() {

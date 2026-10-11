@@ -6,4 +6,15 @@ export type User = {
   wallet: string;
   created_at: number;
   updated_at: number;
+  has_avatar: boolean;
+};
+
+export type PublicUser = {
+  id: string;
+  wallet: string;
+  username: string | null;
+  userId: string | null;
+  email: string;
+  has_avatar: boolean;
+  updated_at: number;
 };

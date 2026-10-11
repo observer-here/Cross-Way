@@ -22,6 +22,12 @@ function expiry(days = 7) {
   return BigInt(Math.floor(Date.now() / 1000) + days * 86400);
 }
 
+function expiryAt(date?: string) {
+  if (!date) return expiry(7);
+  const t = Math.floor(new Date(`${date}T23:59:59`).getTime() / 1000);
+  return Number.isFinite(t) ? BigInt(t) : expiry(7);
+}
+
 function kindOf(value: string) {
   if (value.includes("@")) return { kind: KIND.EMAIL, value: value.toLowerCase() };
   if (value.includes("-") || value.includes("_")) return { kind: KIND.USER_ID, value };
@@ -90,29 +96,29 @@ export async function sendPayment(wallet: ArcWallet, to: string, amount: string,
   const value = toTokenAmount(amount, token.decimals);
   await approve(wallet, token.address, value);
   if (isAddress(to)) {
-    await exec(wallet, "sendToAddress", [to, token.address, value, memoBytes(memo)]);
-    return;
+    return exec(wallet, "sendToAddress", [to, token.address, value, memoBytes(memo)]);
   }
   const id = kindOf(to);
-  await exec(wallet, "sendTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
+  return exec(wallet, "sendTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
 }
 
-export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string) {
+export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string, expires?: string) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
+  const until = expiryAt(expires);
   if (!from.trim()) {
-    return exec(wallet, "createLink", [token.address, value, expiry(), memoBytes(memo)]);
+    return exec(wallet, "createLink", [token.address, value, until, memoBytes(memo)]);
   }
   if (isAddress(from)) {
-    return exec(wallet, "createRequest", [from, token.address, value, expiry(), memoBytes(memo)]);
+    return exec(wallet, "createRequest", [from, token.address, value, until, memoBytes(memo)]);
   }
   const id = kindOf(from);
-  return exec(wallet, "createRequestTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
+  return exec(wallet, "createRequestTo", [id.kind, id.value, token.address, value, until, memoBytes(memo)]);
 }
 
-export async function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, days = 7) {
+export async function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, expires?: string) {
   const token = tokenOf(symbol);
-  return exec(wallet, "createLink", [token.address, toTokenAmount(amount, token.decimals), expiry(days), memoBytes(memo)]);
+  return exec(wallet, "createLink", [token.address, toTokenAmount(amount, token.decimals), expiryAt(expires), memoBytes(memo)]);
 }
 
 export async function payInvoice(wallet: ArcWallet, id: bigint, token: Address, amount: bigint) {
