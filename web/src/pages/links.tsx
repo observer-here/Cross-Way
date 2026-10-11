@@ -102,7 +102,7 @@ export function LinksPage() {
   }
 
   return (
-    <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)_300px]">
+    <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
       <SideMark text="Create a shareable link. Get paid from anyone.">
         <SoftIcon className="bg-emerald-50 text-emerald-500">
           <svg viewBox="0 0 24 24" className="h-6 w-6 fill-none stroke-current" strokeWidth="2">
@@ -113,7 +113,8 @@ export function LinksPage() {
       <section>
         <h1 className="text-2xl font-semibold">Create Payment Link</h1>
         <p className="mt-1 text-sm text-slate-500">Generate a payment link to receive tokens.</p>
-        <form className="panel mt-6 flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <form className="panel flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Amount (optional)">
               <Input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="0.00" required />
@@ -132,7 +133,6 @@ export function LinksPage() {
           <Glow disabled={!wallet.address}>{wallet.address ? "Generate Link →" : "Wallet loading…"}</Glow>
           {status && <p className="text-sm text-slate-500">{status}</p>}
         </form>
-      </section>
       <aside className="panel flex flex-col items-center p-6">
         <p className="self-start text-sm font-semibold">Preview</p>
         <img src={qrSrc(link || "crossway")} alt="" className="mt-6 h-40 w-40 rounded-xl bg-white p-2" />
@@ -142,6 +142,8 @@ export function LinksPage() {
           <span className="rounded-full bg-slate-50 px-3 py-1.5 text-xs text-slate-400">Share</span>
         </div>
       </aside>
+        </div>
+      </section>
     </div>
   );
 }

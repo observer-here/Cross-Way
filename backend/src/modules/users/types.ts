@@ -20,6 +20,7 @@ export type PublicUser = {
 };
 
 export type LookupQuery = {
+  q?: string;
   email?: string;
   username?: string;
   userId?: string;

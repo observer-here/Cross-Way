@@ -19,7 +19,7 @@ app.use("*", (c, next) =>
 app.onError((err, c) => {
   const status = err instanceof HttpError ? err.status : 500;
   const message = err instanceof HttpError ? err.message : "internal";
-  return c.body(JSON.stringify({ error: message }), status, { "Content-Type": "application/json" });
+  return new Response(JSON.stringify({ error: message }), { status, headers: { "Content-Type": "application/json" } });
 });
 
 app.route("/v1", chainRoutes);

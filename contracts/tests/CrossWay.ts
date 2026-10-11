@@ -15,38 +15,10 @@ describe("CrossWay", function () {
     return { alice, bob, carol, token, pay };
   }
 
-  it("sends to address, username, email, and user id", async function () {
+  it("sends to an address", async function () {
     const { alice, bob, token, pay } = await loadFixture(setup);
-    const t = await token.getAddress();
-    const exp = (await time.latest()) + 86_400;
-    await pay.connect(alice).sendToAddress(bob.address, t, 10_000_000, "0x6869");
-    await pay.connect(bob).register(await pay.USERNAME(), "bob");
-    await pay.connect(bob).register(await pay.EMAIL(), "bob@example.com");
-    await pay.connect(bob).register(await pay.USER_ID(), "user-42");
-    await pay.connect(alice).sendTo(await pay.USERNAME(), "bob", t, 1_000_000, exp, "0x");
-    await pay.connect(alice).sendTo(await pay.EMAIL(), "bob@example.com", t, 2_000_000, exp, "0x");
-    await pay.connect(alice).sendTo(await pay.USER_ID(), "user-42", t, 3, exp, "0x");
-    expect(await token.balanceOf(bob.address)).to.equal(1_013_000_003);
-  });
-
-  it("holds then claims when identity is registered", async function () {
-    const { alice, bob, token, pay } = await loadFixture(setup);
-    const exp = (await time.latest()) + 86_400;
-    await pay.connect(alice).sendTo(await pay.EMAIL(), "bob@example.com", await token.getAddress(), 7_000_000, exp, "0x");
-    expect(await token.balanceOf(await pay.getAddress())).to.equal(7_000_000);
-    await pay.connect(bob).register(await pay.EMAIL(), "bob@example.com");
-    expect(await token.balanceOf(bob.address)).to.equal(1_007_000_000);
-    expect((await pay.pendings(1)).from).to.equal(ethers.ZeroAddress);
-  });
-
-  it("refunds after expiry", async function () {
-    const { alice, token, pay } = await loadFixture(setup);
-    const exp = (await time.latest()) + 86_400;
-    await pay.connect(alice).sendTo(await pay.USERNAME(), "ghost", await token.getAddress(), 3_000_000, exp, "0x");
-    await time.increaseTo(exp);
-    await pay.connect(alice).refund(1);
-    expect(await token.balanceOf(alice.address)).to.equal(1_000_000_000);
-    expect((await pay.pendings(1)).from).to.equal(ethers.ZeroAddress);
+    await pay.connect(alice).sendToAddress(bob.address, await token.getAddress(), 10_000_000, "0x6869");
+    expect(await token.balanceOf(bob.address)).to.equal(1_010_000_000);
   });
 
   it("requests, links, redeems, and cancels", async function () {
@@ -55,8 +27,7 @@ describe("CrossWay", function () {
     const exp = (await time.latest()) + 86_400;
     await pay.connect(bob).createRequest(alice.address, t, 2_000_000, exp, "0x");
     await pay.connect(alice).pay(1, "0x");
-    await pay.connect(alice).register(await pay.USERNAME(), "alice");
-    await pay.connect(bob).createRequestTo(await pay.USERNAME(), "alice", t, 4_000_000, exp, "0x");
+    await pay.connect(bob).createRequest(alice.address, t, 4_000_000, exp, "0x");
     await expect(pay.connect(carol).pay(2, "0x")).to.be.revertedWithCustomError(pay, "NotPayer");
     await pay.connect(alice).pay(2, "0x");
     await pay.connect(bob).createLink(t, 5_000_000, exp, "0x");

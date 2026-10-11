@@ -1,12 +1,16 @@
+import { useEffect, useState } from "react";
+
 const tones = ["bg-violet-500", "bg-sky-500", "bg-emerald-500", "bg-orange-400", "bg-indigo-500"];
 const sizes = { xs: "h-7 w-7 text-[10px]", sm: "h-8 w-8 text-[11px]", md: "h-10 w-10 text-sm", lg: "h-14 w-14 text-lg" };
 
-export function Avatar({ name, src, size = "md" }: { name: string; src?: string; size?: keyof typeof sizes }) {
+export function Avatar({ name, src, size = "md", tone }: { name: string; src?: string; size?: keyof typeof sizes; tone?: string }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
   const box = `shrink-0 rounded-full ${sizes[size]}`;
-  if (src) return <img src={src} alt="" className={`${box} object-cover`} />;
+  if (src && !failed) return <img src={src} alt="" onError={() => setFailed(true)} className={`${box} object-cover`} />;
   const clean = name.replace(/^@/, "").trim() || "?";
-  const tone = tones[clean.charCodeAt(0) % tones.length];
-  return <span className={`grid place-items-center font-semibold text-white ${tone} ${box}`}>{clean[0].toUpperCase()}</span>;
+  const color = tone ?? tones[clean.charCodeAt(0) % tones.length];
+  return <span className={`grid place-items-center font-semibold text-white ${color} ${box}`}>{clean[0].toUpperCase()}</span>;
 }
 
 export function PersonChip({ label, sub, src, onClear }: { label: string; sub?: string; src?: string; onClear?: () => void }) {

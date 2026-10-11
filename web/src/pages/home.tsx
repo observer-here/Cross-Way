@@ -10,13 +10,13 @@ export function HomePage() {
 
   return (
     <div className="page">
-      <p className="italic text-slate-400">Welcome Back,</p>
-      <h1 className="mt-1 text-5xl font-semibold tracking-tight">{name}</h1>
-      <p className="mt-2 text-sm text-slate-400">Send, receive and manage your payments on Arc Testnet.</p>
+      <p className="text-[22px] font-normal text-slate-400 italic">Welcome back,</p>
+      <h1 className="mt-1 text-5xl font-extrabold tracking-tight text-slate-950 sm:text-[56px] sm:leading-none">{name}</h1>
+      <p className="mt-3 text-sm text-slate-500">Send, receive and manage your payments on Arc Testnet.</p>
       <div className="mt-8">
         <Actions />
       </div>
-      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-4 grid items-stretch gap-4 lg:grid-cols-[minmax(280px,0.82fr)_minmax(0,1.18fr)]">
         <Balance />
         <Activity />
       </div>

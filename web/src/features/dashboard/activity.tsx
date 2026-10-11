@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { zeroAddress } from "viem";
 
 import { useSession } from "@/auth/session";
-import { ARC } from "@/chain/arc";
 import { loadActivity, loadMyInvoices, type ActivityItem, type InvoiceRow } from "@/chain/read";
 import { personLabel } from "@/lib/format";
 
@@ -24,14 +23,15 @@ export function Activity({ title = "Recent Activity", all = false }: { title?: s
   }, [wallet]);
 
   const pending = asks.filter((r) => r.status === "Pending");
-  const shown = rows ? (all ? rows : rows.slice(0, pending.length ? 3 : 4)) : [];
+  const pendingShown = all ? pending : pending.slice(0, 1);
+  const shown = rows ? (all ? rows : rows.slice(0, Math.max(0, 4 - pendingShown.length))) : [];
 
   return (
-    <section className="panel p-6">
+    <section className="dash-card p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>
         {!all && (
-          <Link to="/history" className="text-xs text-slate-400">
+          <Link to="/history" className="text-sm font-medium text-indigo-500">
             View All →
           </Link>
         )}
@@ -39,59 +39,60 @@ export function Activity({ title = "Recent Activity", all = false }: { title?: s
       {!wallet && <p className="mt-6 text-sm text-slate-400">Waiting for wallet…</p>}
       {wallet && !rows && !err && <p className="mt-6 text-sm text-slate-400">Loading…</p>}
       {err && <p className="mt-6 text-sm text-rose-500">{err}</p>}
-      {rows && shown.length === 0 && pending.length === 0 && <p className="mt-6 text-sm text-slate-400">No payments yet.</p>}
-      {(shown.length > 0 || pending.length > 0) && (
-        <ul className="mt-3">
+      {rows && shown.length === 0 && pendingShown.length === 0 && <p className="mt-6 text-sm text-slate-400">No payments yet.</p>}
+      {(shown.length > 0 || pendingShown.length > 0) && (
+        <ul className="mt-2">
           {shown.map((tx) => (
-            <li key={tx.id}>
-              <Link to={`/tx/${tx.hash}`} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5">
-                <KindIcon kind={kindOf(tx)} />
-                <span className="min-w-0">
-                  <span className="block truncate text-sm">{label(tx)}</span>
-                  <span className="text-xs text-slate-400">{tx.time}</span>
-                </span>
-                <span className="text-right">
-                  <span className={`block text-sm ${tx.dir === "out" ? "text-slate-600" : "text-emerald-500"}`}>
-                    {tx.dir === "out" ? "-" : "+"}${tx.amount} {tx.token}
-                  </span>
-                  <span className="text-[11px] text-emerald-500">Completed</span>
-                </span>
-              </Link>
-            </li>
+            <Row
+              key={tx.id}
+              to={`/tx/${tx.hash}`}
+              kind={kindOf(tx)}
+              title={label(tx)}
+              time={tx.time}
+              amount={`${tx.dir === "out" ? "-" : "+"}${money(tx.amount)} ${tx.token}`}
+              tone={tx.dir === "out" ? "text-slate-500" : "text-emerald-500"}
+              done
+            />
           ))}
-          {!all &&
-            pending.slice(0, 2).map((row) => (
-              <li key={`inv-${row.id}`}>
-                <Link to={`/pay/${row.id}`} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5">
-                  <KindIcon kind="request" />
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm">{askLabel(row)}</span>
-                    <span className="text-xs text-slate-400">{row.time}</span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block text-sm text-slate-700">
-                      {row.amount} {row.token}
-                    </span>
-                    <span className="text-[11px] text-orange-400">Pending</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
+          {pendingShown.map((row) => (
+            <Row key={`inv-${row.id}`} to={`/pay/${row.id}`} kind="request" title={askLabel(row)} time={row.time} amount={`${money(row.amount)} ${row.token}`} tone="text-slate-700" />
+          ))}
         </ul>
       )}
     </section>
   );
 }
 
+function Row({ to, kind, title, time, amount, tone, done }: { to: string; kind: Kind; title: string; time: string; amount: string; tone: string; done?: boolean }) {
+  return (
+    <li>
+      <Link to={to} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3">
+        <KindIcon kind={kind} />
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-medium text-slate-800">{title}</span>
+          <span className="block text-xs whitespace-nowrap text-slate-400">{time}</span>
+        </span>
+        <span className="flex flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3">
+          <span className={`text-sm whitespace-nowrap tabular-nums ${tone}`}>{amount}</span>
+          <Status ok={done} />
+        </span>
+      </Link>
+    </li>
+  );
+}
+
+function money(amount: string) {
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return amount;
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function kindOf(tx: ActivityItem) {
-  const contract = tx.to.toLowerCase() === ARC.contract.toLowerCase() || tx.from.toLowerCase() === ARC.contract.toLowerCase();
-  if (contract) return "link" as const;
   return tx.dir === "out" ? ("send" as const) : ("receive" as const);
 }
 
 function label(tx: ActivityItem) {
   const who = personLabel(tx.counterparty);
-  if (kindOf(tx) === "link") return "Payment link";
   return tx.dir === "out" ? `Sent to ${who}` : `Received from ${who}`;
 }
 
@@ -100,21 +101,24 @@ function askLabel(row: InvoiceRow) {
   return `Request to ${personLabel(row.counterparty)}`;
 }
 
-function KindIcon({ kind }: { kind: "send" | "receive" | "link" | "request" }) {
-  const tone =
-    kind === "link" ? "bg-emerald-50 text-emerald-500" : kind === "send" ? "bg-sky-50 text-sky-500" : kind === "request" ? "bg-fuchsia-50 text-fuchsia-500" : "bg-violet-50 text-violet-500";
+function Status({ ok }: { ok?: boolean }) {
+  return <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${ok ? "bg-emerald-50 text-emerald-500" : "bg-orange-50 text-orange-400"}`}>{ok ? "Completed" : "Pending"}</span>;
+}
+
+type Kind = "send" | "receive" | "request";
+
+function KindIcon({ kind }: { kind: Kind }) {
+  const tone = kind === "send" ? "bg-indigo-50 text-indigo-500" : kind === "receive" ? "bg-emerald-50 text-emerald-500" : "bg-fuchsia-50 text-fuchsia-500";
   const d =
-    kind === "link"
-      ? "M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"
-      : kind === "send"
-        ? "M3 11.5 21 3l-7.5 18-2.4-6.6L3 11.5z"
-        : kind === "request"
-          ? "M7 4h10a2 2 0 0 1 2 2v14l-7-3-7 3V6a2 2 0 0 1 2-2z"
-          : "M12 3v12m0 0 4-4m-4 4-4-4M5 19h14";
-  const stroke = kind === "receive" || kind === "link";
+    kind === "send"
+      ? "M3.2 11.4 20.6 3.4l-7.2 17.2-2.5-6.8L3.2 11.4z"
+      : kind === "request"
+        ? "M8 3.5v2M16 3.5v2M5.5 9h13M7 5.2h10a1.8 1.8 0 0 1 1.8 1.8V19a1.4 1.4 0 0 1-1.4 1.4H6.6A1.4 1.4 0 0 1 5.2 19V7a1.8 1.8 0 0 1 1.8-1.8z"
+        : "M12 4v11m0 0 4-4m-4 4-4-4M6 20h12";
+  const stroke = kind !== "send";
   return (
-    <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-2xl ${tone}`}>
-      <svg viewBox="0 0 24 24" className={`h-4 w-4 ${stroke ? "fill-none stroke-current" : "fill-current"}`} strokeWidth="1.8">
+    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${tone}`}>
+      <svg viewBox="0 0 24 24" className={`h-4 w-4 ${stroke ? "fill-none stroke-current" : "fill-current"}`} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d={d} />
       </svg>
     </span>

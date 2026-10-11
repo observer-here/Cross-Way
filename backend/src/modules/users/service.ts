@@ -46,6 +46,19 @@ export class UsersService {
   }
 
   async lookup(query: LookupQuery) {
+    const raw = query.q?.trim();
+    if (raw) {
+      if (raw.includes("@")) query = { email: raw.toLowerCase() };
+      else if (/^0x[a-fA-F0-9]{40}$/.test(raw)) query = { wallet: raw.toLowerCase() };
+      else {
+        const name = raw.replace(/^@/, "").toLowerCase();
+        const byName = await this.repo.lookup({ username: name });
+        if (byName) return toPublic(byName);
+        const byId = await this.repo.lookup({ userId: raw.replace(/^@/, "") });
+        if (byId) return toPublic(byId);
+        fail(404, "not found");
+      }
+    }
     const q: LookupQuery = {
       email: query.email?.trim().toLowerCase(),
       username: query.username?.trim().toLowerCase(),

@@ -4,8 +4,6 @@ import type { Address } from "viem";
 
 import { syncMe } from "@/api/users";
 import type { User } from "@/api/types";
-import { useArcWallet } from "@/chain/wallet";
-import { syncIdentities } from "@/chain/write";
 
 type Session = {
   me: User | null;
@@ -19,7 +17,6 @@ const Ctx = createContext<Session>({ me: null, wallet: undefined, error: "", set
 export function SessionProvider({ children }: { children: ReactNode }) {
   const { ready, authenticated, getAccessToken } = usePrivy();
   const { wallets } = useWallets();
-  const signer = useArcWallet();
   const [me, setMe] = useState<User | null>(null);
   const [error, setError] = useState("");
   const wallet = wallets.find((w) => w.walletClientType === "privy")?.address as Address | undefined;
@@ -47,11 +44,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       alive = false;
     };
   }, [ready, authenticated, wallet, getAccessToken]);
-
-  useEffect(() => {
-    if (!me || !signer.address) return;
-    void syncIdentities(signer, me).catch(() => {});
-  }, [me, signer.address]);
 
   return <Ctx.Provider value={{ me, wallet, error, setMe }}>{children}</Ctx.Provider>;
 }

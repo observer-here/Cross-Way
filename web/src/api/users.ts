@@ -5,11 +5,12 @@ import type { PublicUser, User } from "./types";
 
 export function avatarSrc(user?: Pick<User, "id" | "has_avatar" | "updated_at"> | null) {
   if (!user?.has_avatar) return undefined;
-  return `${env.apiUrl}/v1/avatars/${user.id}?v=${user.updated_at}`;
+  return `${env.apiUrl}/v1/avatars/${encodeURIComponent(user.id)}?v=${user.updated_at}`;
 }
 
-export function lookup(query: { email?: string; username?: string; userId?: string; wallet?: string }) {
+export function lookup(query: { q?: string; email?: string; username?: string; userId?: string; wallet?: string }) {
   const params = new URLSearchParams();
+  if (query.q) params.set("q", query.q);
   if (query.email) params.set("email", query.email);
   if (query.username) params.set("username", query.username);
   if (query.userId) params.set("userId", query.userId);

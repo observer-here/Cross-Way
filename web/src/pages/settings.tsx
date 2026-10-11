@@ -4,8 +4,6 @@ import { useRef, useState, type FormEvent } from "react";
 import { avatarSrc, toAvatarJpeg, updateMe, uploadAvatar } from "@/api/users";
 import { useSession } from "@/auth/session";
 import { ARC } from "@/chain/arc";
-import { useArcWallet } from "@/chain/wallet";
-import { syncIdentities } from "@/chain/write";
 import { labelOf } from "@/lib/format";
 import { Avatar } from "@/shared/ui/avatar";
 import { Field, Input, Submit } from "@/shared/ui/field";
@@ -15,7 +13,6 @@ const tabs = ["Profile", "Wallet"] as const;
 export function SettingsPage() {
   const { getAccessToken, user, logout } = usePrivy();
   const { me, wallet, setMe } = useSession();
-  const signer = useArcWallet();
   const fileRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<(typeof tabs)[number]>("Profile");
   const [status, setStatus] = useState("");
@@ -30,10 +27,7 @@ export function SettingsPage() {
     try {
       const token = await getAccessToken();
       if (!token) throw new Error("not signed in");
-      const next = await updateMe(token, { username, userId });
-      setMe(next);
-      setStatus("Registering on-chain…");
-      await syncIdentities(signer, { email: me?.email, username, user_id: userId });
+      setMe(await updateMe(token, { username, userId }));
       setStatus("Saved.");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "failed");

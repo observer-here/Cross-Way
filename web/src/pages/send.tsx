@@ -169,12 +169,12 @@ export function SendPage() {
   }
 
   return (
-    <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)_320px]">
+    <div className="page grid items-start gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
       <SideMark text="Send tokens to anyone. Anywhere." />
       <section>
         <h1 className="text-2xl font-semibold">Send Payment</h1>
-        <p className="mt-1 text-sm text-slate-500">Send ERC-20 tokens to anyone on Arc Testnet using a username, email, EVM address or user ID.</p>
-        <form className="panel mt-6 flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <form className="panel flex flex-col gap-5 p-6 lg:p-8" onSubmit={onSubmit}>
           <Field label="To">
             <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="username, email, EVM address or user ID" required />
           </Field>
@@ -200,27 +200,28 @@ export function SendPage() {
           </Field>
           <p className="text-right text-[11px] text-slate-400">{memo.length}/200</p>
           <Glow disabled={!wallet.address}>{wallet.address ? "Review & Send →" : "Wallet loading…"}</Glow>
-        </form>
-      </section>
-      <aside className="panel p-5">
-        <div className="flex rounded-full bg-slate-100 p-1 text-sm">
-          <button type="button" onClick={() => setTab("contacts")} className={`flex-1 rounded-full py-1.5 ${tab === "contacts" ? "bg-white shadow-sm" : "text-slate-400"}`}>
-            Contacts
-          </button>
-          <button type="button" onClick={() => setTab("recent")} className={`flex-1 rounded-full py-1.5 ${tab === "recent" ? "bg-white shadow-sm" : "text-slate-400"}`}>
-            Recent
-          </button>
+          </form>
+          <aside className="panel p-5">
+            <div className="flex rounded-full bg-slate-100 p-1 text-sm">
+              <button type="button" onClick={() => setTab("contacts")} className={`flex-1 rounded-full py-1.5 ${tab === "contacts" ? "bg-white shadow-sm" : "text-slate-400"}`}>
+                Contacts
+              </button>
+              <button type="button" onClick={() => setTab("recent")} className={`flex-1 rounded-full py-1.5 ${tab === "recent" ? "bg-white shadow-sm" : "text-slate-400"}`}>
+                Recent
+              </button>
+            </div>
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search contacts..." className="mt-4" />
+            <ul className="mt-2">
+              {list.length === 0 && <li className="py-10 text-center text-sm text-slate-400">No contacts yet.</li>}
+              {list.map((p) => (
+                <li key={p.to}>
+                  <PersonRow person={p} onPick={setTo} />
+                </li>
+              ))}
+            </ul>
+          </aside>
         </div>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search contacts..." className="mt-4" />
-        <ul className="mt-2">
-          {list.length === 0 && <li className="py-10 text-center text-sm text-slate-400">No contacts yet.</li>}
-          {list.map((p) => (
-            <li key={p.to}>
-              <PersonRow person={p} onPick={setTo} />
-            </li>
-          ))}
-        </ul>
-      </aside>
+      </section>
     </div>
   );
 }

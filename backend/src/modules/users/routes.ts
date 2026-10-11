@@ -9,6 +9,7 @@ import type { ProfilePatch } from "./types";
 export const userRoutes = new Hono<AppEnv>()
   .get("/lookup", async (c) => {
     const data = await new UsersService(c.env).lookup({
+      q: c.req.query("q"),
       email: c.req.query("email"),
       username: c.req.query("username"),
       userId: c.req.query("userId"),
@@ -18,12 +19,10 @@ export const userRoutes = new Hono<AppEnv>()
   })
   .get("/avatars/:id", async (c) => {
     const row = await new UsersService(c.env).avatar(c.req.param("id"));
-    if (!row?.avatar) fail(404, "not found");
-    return new Response(row.avatar, {
-      headers: {
-        "Content-Type": row.avatar_type || "image/jpeg",
-        "Cache-Control": "public, max-age=86400",
-      },
+    if (!row) fail(404, "not found");
+    return c.body(row.bytes, 200, {
+      "Content-Type": row.type || "image/jpeg",
+      "Cache-Control": "public, max-age=3600",
     });
   })
   .get("/me", requireUser, async (c) => {

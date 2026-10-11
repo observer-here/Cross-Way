@@ -42,10 +42,14 @@ export class UsersRepo {
   }
 
   saveAvatar(id: string, bytes: ArrayBuffer, type: string, now: number) {
-    return this.db.prepare("UPDATE users SET avatar = ?, avatar_type = ?, updated_at = ? WHERE id = ?").bind(bytes, type, now, id).run();
+    return this.db.prepare("UPDATE users SET avatar = ?, avatar_type = ?, updated_at = ? WHERE id = ?").bind(new Uint8Array(bytes), type, now, id).run();
   }
 
-  avatar(id: string) {
-    return this.db.prepare("SELECT avatar, avatar_type FROM users WHERE id = ? AND avatar IS NOT NULL").bind(id).first<{ avatar: ArrayBuffer; avatar_type: string }>();
+  async avatar(id: string) {
+    const row = await this.db.prepare("SELECT hex(avatar) AS hex, avatar_type FROM users WHERE id = ? AND avatar IS NOT NULL").bind(id).first<{ hex: string; avatar_type: string }>();
+    if (!row?.hex) return null;
+    const bytes = new Uint8Array(row.hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(row.hex.slice(i * 2, i * 2 + 2), 16);
+    return { bytes, type: row.avatar_type };
   }
 }

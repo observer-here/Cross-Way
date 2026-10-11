@@ -1,16 +1,6 @@
 export const crossWayAbi = [
   {
     type: "function",
-    name: "register",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "kind", type: "bytes32" },
-      { name: "value", type: "string" },
-    ],
-    outputs: [],
-  },
-  {
-    type: "function",
     name: "sendToAddress",
     stateMutability: "nonpayable",
     inputs: [
@@ -23,38 +13,10 @@ export const crossWayAbi = [
   },
   {
     type: "function",
-    name: "sendTo",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "kind", type: "bytes32" },
-      { name: "value", type: "string" },
-      { name: "token", type: "address" },
-      { name: "amount", type: "uint256" },
-      { name: "expiresAt", type: "uint64" },
-      { name: "memo", type: "bytes" },
-    ],
-    outputs: [],
-  },
-  {
-    type: "function",
     name: "createRequest",
     stateMutability: "nonpayable",
     inputs: [
       { name: "payer", type: "address" },
-      { name: "token", type: "address" },
-      { name: "amount", type: "uint256" },
-      { name: "expiresAt", type: "uint64" },
-      { name: "memo", type: "bytes" },
-    ],
-    outputs: [{ type: "uint256" }],
-  },
-  {
-    type: "function",
-    name: "createRequestTo",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "kind", type: "bytes32" },
-      { name: "value", type: "string" },
       { name: "token", type: "address" },
       { name: "amount", type: "uint256" },
       { name: "expiresAt", type: "uint64" },
@@ -99,7 +61,6 @@ export const crossWayAbi = [
       { name: "to", type: "address", indexed: true },
       { name: "token", type: "address", indexed: true },
       { name: "amount", type: "uint256", indexed: false },
-      { name: "key", type: "bytes32", indexed: false },
       { name: "method", type: "uint8", indexed: false },
       { name: "refId", type: "uint256", indexed: false },
       { name: "memo", type: "bytes", indexed: false },
@@ -112,7 +73,6 @@ export const crossWayAbi = [
       { name: "id", type: "uint256", indexed: true },
       { name: "payee", type: "address", indexed: true },
       { name: "payer", type: "address", indexed: true },
-      { name: "payerKey", type: "bytes32", indexed: false },
       { name: "token", type: "address", indexed: false },
       { name: "amount", type: "uint256", indexed: false },
       { name: "expiresAt", type: "uint64", indexed: false },

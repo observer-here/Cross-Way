@@ -1,9 +1,10 @@
-import { erc20Abi, isAddress, toHex, type Address, type Hex, type WalletClient } from "viem";
+import { erc20Abi, toHex, type Address, type WalletClient } from "viem";
 
+import { lookup } from "@/api/users";
 import { toTokenAmount } from "@/lib/format";
 
 import { crossWayAbi } from "./abi";
-import { ARC, GAS, KIND, TOKENS } from "./arc";
+import { ARC, GAS, TOKENS } from "./arc";
 
 export type ArcWallet = {
   address: Address | undefined;
@@ -28,20 +29,18 @@ function expiryAt(date?: string) {
   return Number.isFinite(t) ? BigInt(t) : expiry(7);
 }
 
-function kindOf(value: string) {
-  if (value.includes("@")) return { kind: KIND.EMAIL, value: value.toLowerCase() };
-  if (value.includes("-") || value.includes("_")) return { kind: KIND.USER_ID, value };
-  return { kind: KIND.USERNAME, value: value.toLowerCase() };
-}
-
 function sender(wallet: ArcWallet, client: WalletClient) {
   const account = client.account ?? wallet.address;
   if (!account) throw new Error("no account");
   return { account, chain: client.chain };
 }
 
-function skipKey(wallet: string, kind: Hex, value: string) {
-  return `cw:id:${wallet.toLowerCase()}:${kind}:${value.trim().toLowerCase()}`;
+async function resolveWallet(value: string) {
+  const v = value.trim();
+  if (/^0x[a-fA-F0-9]{40}$/.test(v)) return v as Address;
+  const found = await lookup({ q: v }).catch(() => null);
+  if (!found?.wallet) throw new Error("user not found");
+  return found.wallet as Address;
 }
 
 async function approve(wallet: ArcWallet, token: Address, amount: bigint) {
@@ -56,7 +55,7 @@ async function approve(wallet: ArcWallet, token: Address, amount: bigint) {
   });
 }
 
-async function exec(wallet: ArcWallet, functionName: "register" | "sendToAddress" | "sendTo" | "createRequest" | "createRequestTo" | "createLink" | "pay" | "cancel", args: readonly unknown[]) {
+async function exec(wallet: ArcWallet, functionName: "sendToAddress" | "createRequest" | "createLink" | "pay" | "cancel", args: readonly unknown[]) {
   const client = await wallet.client();
   return client.writeContract({
     address: ARC.contract,
@@ -68,52 +67,20 @@ async function exec(wallet: ArcWallet, functionName: "register" | "sendToAddress
   });
 }
 
-export async function registerIdentity(wallet: ArcWallet, kind: Hex, value: string) {
-  const v = kind === KIND.USER_ID ? value.trim() : value.trim().toLowerCase();
-  if (!v || !wallet.address) return;
-  const key = skipKey(wallet.address, kind, v);
-  if (localStorage.getItem(key)) return;
-  try {
-    await exec(wallet, "register", [kind, v]);
-    localStorage.setItem(key, "1");
-  } catch (e) {
-    if (/Taken/i.test(String(e))) localStorage.setItem(key, "1");
-    else throw e;
-  }
-}
-
-export async function syncIdentities(
-  wallet: ArcWallet,
-  profile: { email?: string | null; username?: string | null; user_id?: string | null },
-) {
-  if (profile.email) await registerIdentity(wallet, KIND.EMAIL, profile.email);
-  if (profile.username) await registerIdentity(wallet, KIND.USERNAME, profile.username);
-  if (profile.user_id) await registerIdentity(wallet, KIND.USER_ID, profile.user_id);
-}
-
 export async function sendPayment(wallet: ArcWallet, to: string, amount: string, symbol: string, memo: string) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
+  const dest = await resolveWallet(to);
   await approve(wallet, token.address, value);
-  if (isAddress(to)) {
-    return exec(wallet, "sendToAddress", [to, token.address, value, memoBytes(memo)]);
-  }
-  const id = kindOf(to);
-  return exec(wallet, "sendTo", [id.kind, id.value, token.address, value, expiry(), memoBytes(memo)]);
+  return exec(wallet, "sendToAddress", [dest, token.address, value, memoBytes(memo)]);
 }
 
 export async function createPaymentRequest(wallet: ArcWallet, from: string, amount: string, symbol: string, memo: string, expires?: string) {
   const token = tokenOf(symbol);
   const value = toTokenAmount(amount, token.decimals);
   const until = expiryAt(expires);
-  if (!from.trim()) {
-    return exec(wallet, "createLink", [token.address, value, until, memoBytes(memo)]);
-  }
-  if (isAddress(from)) {
-    return exec(wallet, "createRequest", [from, token.address, value, until, memoBytes(memo)]);
-  }
-  const id = kindOf(from);
-  return exec(wallet, "createRequestTo", [id.kind, id.value, token.address, value, until, memoBytes(memo)]);
+  if (!from.trim()) return exec(wallet, "createLink", [token.address, value, until, memoBytes(memo)]);
+  return exec(wallet, "createRequest", [await resolveWallet(from), token.address, value, until, memoBytes(memo)]);
 }
 
 export async function createPaymentLink(wallet: ArcWallet, amount: string, symbol: string, memo: string, expires?: string) {
