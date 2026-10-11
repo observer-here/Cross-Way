@@ -43,7 +43,7 @@ export function Activity({ title = "Recent Activity", all = false, pageSize }: {
         )}
       </div>
       {loading && <SkelRows n={size || 6} />}
-      {err && <p className="mt-6 text-sm text-rose-500">{err}</p>}
+      {err && <p className="mt-6 text-sm break-words text-rose-500">{err}</p>}
       {rows && shown.length === 0 && pendingShown.length === 0 && <p className="mt-6 text-sm text-slate-400">No payments yet.</p>}
       {(shown.length > 0 || pendingShown.length > 0) && (
         <ul className="mt-2">

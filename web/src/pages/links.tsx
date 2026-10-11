@@ -56,7 +56,7 @@ export function LinksPage() {
                 </svg>
               </SoftIcon>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">{memo || "Payment Link"}</p>
+                <p className="font-semibold break-words">{memo || "Payment Link"}</p>
                 <p className="mt-1 truncate text-sm text-indigo-500">{link}</p>
                 <div className="mt-3 flex gap-2">
                   <button type="button" onClick={copy} className="rounded-full bg-slate-50 px-3 py-1.5 text-xs">
@@ -139,7 +139,7 @@ export function LinksPage() {
             <DaysSelect value={days} onChange={(e) => setDays(e.target.value)} />
           </Field>
           <Glow disabled={!wallet.address}>{wallet.address ? "Generate Link →" : "Wallet loading…"}</Glow>
-          {status && <p className="text-sm text-slate-500">{status}</p>}
+          {status && <p className="text-sm break-all text-slate-500">{status}</p>}
         </form>
       <aside className="panel flex flex-col items-center p-3.5 lg:p-6">
         <p className="self-start text-sm font-semibold">Preview</p>

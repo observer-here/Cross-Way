@@ -75,7 +75,7 @@ export function RequestPage() {
             <DaysSelect value={days} onChange={(e) => setDays(e.target.value)} />
           </Field>
           <Glow disabled={!signer.address}>{signer.address ? "Create Request →" : "Wallet loading…"}</Glow>
-          {status && <p className="text-sm text-slate-500">{status}</p>}
+          {status && <p className="text-sm break-all text-slate-500">{status}</p>}
         </form>
       <aside className="panel p-3.5 lg:p-5">
         <h2 className="text-sm font-semibold">Recent Requests</h2>

@@ -72,10 +72,10 @@ export function SendPage() {
         <div className="panel mt-5 w-full max-w-xl p-4 lg:mt-8 lg:p-6">
           <div className="flex items-center gap-3">
             <Avatar name={label} src={who?.src} size="sm" />
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-slate-400">To</p>
-              <p className="text-sm font-medium">{label}</p>
-              {sub && <p className="text-[11px] text-slate-400">{sub}</p>}
+              <p className="text-sm font-medium break-words">{label}</p>
+              {sub && <p className="text-[11px] break-all text-slate-400">{sub}</p>}
             </div>
           </div>
           <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
@@ -107,9 +107,9 @@ export function SendPage() {
               <ReviewRow label="To" tone="bg-violet-50 text-violet-500" icon="M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20c1.5-4 14.5-4 16 0" onEdit={() => setStep("form")}>
                 <span className="flex items-center gap-2">
                   <Avatar name={label} src={who?.src} size="xs" />
-                  <span>
-                    <span className="block text-sm font-medium">{label}</span>
-                    {sub && <span className="block text-[11px] text-slate-400">{sub}</span>}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium break-words">{label}</span>
+                    {sub && <span className="block text-[11px] break-all text-slate-400">{sub}</span>}
                   </span>
                 </span>
               </ReviewRow>
@@ -151,7 +151,7 @@ export function SendPage() {
             <Glow type="button" className="mt-6" onClick={send} disabled={!wallet.address}>
               {wallet.address ? `Send ${amount} ${token} →` : "Wallet loading…"}
             </Glow>
-            {status && <p className="mt-4 text-sm text-slate-500">{status}</p>}
+            {status && <p className="mt-4 text-sm break-words text-slate-500">{status}</p>}
           </div>
         </section>
         <aside className="relative hidden min-h-[420px] lg:block">
@@ -212,7 +212,7 @@ export function SendPage() {
           </Field>
           <p className="text-right text-[11px] text-slate-400">{memo.length}/200</p>
           <Glow disabled={!wallet.address}>{wallet.address ? "Review & Send →" : "Wallet loading…"}</Glow>
-          {status && <p className="text-sm text-rose-500">{status}</p>}
+          {status && <p className="text-sm break-words text-rose-500">{status}</p>}
           </form>
           <aside className="panel p-3.5 lg:p-5">
             <p className="text-sm font-semibold">Recent</p>
@@ -250,7 +250,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-slate-400">{label}</dt>
-      <dd className="mt-1">{value}</dd>
+      <dd className="mt-1 break-words">{value}</dd>
     </div>
   );
 }
@@ -281,8 +281,8 @@ function ReviewRow({
       </span>
       <div className="min-w-0 flex-1">
         <dt className="text-xs text-slate-400">{label}</dt>
-        <dd className="mt-0.5">{children ?? value}</dd>
-        {sub && <p className="text-[11px] text-slate-400">{sub}</p>}
+        <dd className="mt-0.5 break-words">{children ?? value}</dd>
+        {sub && <p className="text-[11px] break-words text-slate-400">{sub}</p>}
       </div>
       {onEdit && (
         <button type="button" onClick={onEdit} className="text-xs text-indigo-400">

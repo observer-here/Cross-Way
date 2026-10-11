@@ -61,7 +61,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
           <p className="mt-8 text-4xl font-semibold">
             {invoice.amount} {invoice.token}
           </p>
-          {invoice.memo && <p className="mt-2 text-sm text-slate-400">{invoice.memo}</p>}
+          {invoice.memo && <p className="mt-2 text-sm break-words text-slate-400">{invoice.memo}</p>}
           <div className="mt-5 flex gap-2">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">{invoice.token}</span>
             <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs text-indigo-500">Arc Testnet</span>
@@ -125,7 +125,7 @@ function InvoicePay({ id, signer }: { id: bigint; signer: ReturnType<typeof useA
               )}
             </div>
           )}
-          {status && <p className="mt-4 text-sm text-slate-500">{status}</p>}
+          {status && <p className="mt-4 text-sm break-words text-slate-500">{status}</p>}
         </div>
       </div>
     </div>

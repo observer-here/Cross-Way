@@ -5,6 +5,12 @@
   --font-script: "Caveat", cursive;
 }
 
+@layer base {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 body {
   color: #16182b;
   font-family: var(--font-sans);

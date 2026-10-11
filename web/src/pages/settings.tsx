@@ -79,7 +79,7 @@ export function SettingsPage() {
             )}
           </Field>
           <Submit>Save Changes</Submit>
-          {status && <p className="text-sm text-slate-500">{status}</p>}
+          {status && <p className="text-sm break-words text-slate-500">{status}</p>}
           <button type="button" onClick={() => logout()} className="text-left text-sm text-slate-400">
             Log out
           </button>

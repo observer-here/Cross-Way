@@ -35,7 +35,7 @@ export function Balance() {
           </div>
         </>
       )}
-      {err && <p className="mt-8 text-sm text-rose-500">{err}</p>}
+      {err && <p className="mt-8 text-sm break-words text-rose-500">{err}</p>}
       {data && (
         <>
           <div className="relative mt-3 min-h-[96px] lg:mt-4 lg:min-h-[132px]">
