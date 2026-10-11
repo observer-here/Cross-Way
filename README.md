@@ -288,16 +288,16 @@ A single Cloudflare Worker serves the API under `/v1`. Errors are always JSON in
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| GET | `/health` | none | Returns `{ "ok": true }`. |
-| GET | `/wallets/:addr` | none | Returns `balances` (`usdc`, `eurc`), up to 20 recent `activity` items and up to 8 `invoices` for a wallet. Cached for 30 seconds; add `?fresh=1` to skip the cache. |
-| GET | `/invoices/:id` | none | Returns payee, payer, token, amount, raw amount, expiry, memo and whether it is closed. `404` if it does not exist. |
-| GET | `/tx/:hash/invoice-id` | none | Returns `{ "id": "<invoice id>" }` for a transaction that created an invoice, or `null`. |
-| GET | `/lookup` | none | Finds a user by `q` (auto-detects email, `0x` wallet, username or user ID) or by `email`, `username`, `userId` or `wallet`. Returns public fields only. |
-| GET | `/avatars/:id` | none | Returns the profile picture bytes (cached for an hour). |
-| GET | `/me` | Bearer | Returns your profile, or `404` if it has not been created yet. |
-| POST | `/me` | Bearer | Creates your profile from your Privy account (email and wallet required). |
-| PATCH | `/me` | Bearer | Updates your `username`. Returns `409` if it is taken and `400` if it is invalid. |
-| PUT | `/me/avatar` | Bearer | Uploads an avatar as the raw request body (JPEG, PNG or WebP, 32 bytes to 400 KB). |
+| GET | `/health` | 🌍 none | Returns `{ "ok": true }`. |
+| GET | `/wallets/:addr` | 🌍 none | Returns `balances` (`usdc`, `eurc`), up to 20 recent `activity` items and up to 8 `invoices` for a wallet. Cached for 30 seconds; add `?fresh=1` to skip the cache. |
+| GET | `/invoices/:id` | 🌍 none | Returns payee, payer, token, amount, raw amount, expiry, memo and whether it is closed. `404` if it does not exist. |
+| GET | `/tx/:hash/invoice-id` | 🌍 none | Returns `{ "id": "<invoice id>" }` for a transaction that created an invoice, or `null`. |
+| GET | `/lookup` | 🌍 none | Finds a user by `q` (auto-detects email, `0x` wallet, username or user ID) or by `email`, `username`, `userId` or `wallet`. Returns public fields only. |
+| GET | `/avatars/:id` | 🌍 none | Returns the profile picture bytes (cached for an hour). |
+| GET | `/me` | 🔐 Bearer | Returns your profile, or `404` if it has not been created yet. |
+| POST | `/me` | 🔐 Bearer | Creates your profile from your Privy account (email and wallet required). |
+| PATCH | `/me` | 🔐 Bearer | Updates your `username`. Returns `409` if it is taken and `400` if it is invalid. |
+| PUT | `/me/avatar` | 🔐 Bearer | Uploads an avatar as the raw request body (JPEG, PNG or WebP, 32 bytes to 400 KB). |
 
 Authentication is a Privy access token sent as `Authorization: Bearer <token>`. The Worker verifies it against Privy's JWKS for your app ID.
 
@@ -329,18 +329,18 @@ Avatars are stored alongside the user row (migration `0002`). Usernames are assi
 
 | Route | Access | Screen |
 |---|---|---|
-| `/` | public | Landing page |
-| `/login` | public | Email login |
-| `/app` | signed in | Dashboard: balance, quick actions, recent activity, pending requests |
-| `/send` | signed in | Send form, review step and success screen |
-| `/request` | signed in | Create a request, and list your requests with status and cancel |
-| `/links` | signed in | Create a shareable payment link |
-| `/scan` | signed in | Camera scanner (`/scan?me=1` shows your own QR code) |
-| `/pay/:id` | signed in | Review and pay (or cancel) an invoice |
-| `/history` | signed in | Full activity with pagination |
-| `/tx/:hash` | signed in | Transaction detail with explorer link |
-| `/settings` | signed in | Profile, username, avatar, wallet, activity |
-| `*` | public | Not found |
+| `/` | 🌍 public | Landing page |
+| `/login` | 🌍 public | Email login |
+| `/app` | 🔐 signed in | 🏠 Dashboard: balance, quick actions, recent activity, pending requests |
+| `/send` | 🔐 signed in | 💸 Send form, review step and success screen |
+| `/request` | 🔐 signed in | 📨 Create a request, and list your requests with status and cancel |
+| `/links` | 🔐 signed in | 🔗 Create a shareable payment link |
+| `/scan` | 🔐 signed in | 📷 Camera scanner (`/scan?me=1` shows your own QR code) |
+| `/pay/:id` | 🔐 signed in | 🧾 Review and pay (or cancel) an invoice |
+| `/history` | 🔐 signed in | 🕘 Full activity with pagination |
+| `/tx/:hash` | 🔐 signed in | 🔎 Transaction detail with explorer link |
+| `/settings` | 🔐 signed in | ⚙ Profile, username, avatar, wallet, activity |
+| `*` | 🌍 public | Not found |
 
 ### Notes on how it is built
 - **Session:** `auth/session.tsx` keeps the profile in React context and caches it in `localStorage` so the header and name render instantly on reload.
@@ -469,7 +469,10 @@ curl https://<your-worker>.workers.dev/v1/health
 - **Framework preset:** Vite
 - **Build command:** `npm run build`, **output directory:** `dist`
 - **Environment variables:** `VITE_API_URL` and `VITE_PRIVY_APP_ID`
-- **SPA routing:** the app uses client-side routing, so add a `vercel.json` in `web/` that rewrites every path to `/index.html`:
+- **SPA routing:** see the note below.
+
+> [!IMPORTANT]
+> The app uses client-side routing. Add a `vercel.json` in `web/` that rewrites every path to `/index.html`, or refreshing a page like `/send` returns a 404.
 
 ```json
 { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
@@ -495,13 +498,15 @@ curl https://<your-worker>.workers.dev/v1/health
 
 ## 🚧 Known limitations
 
-- **Two transactions per payment.** The wallet approves the exact amount, then calls the contract.
-- **Explorer dependency.** Activity and invoice data come from the Arc explorer API, which sits behind bot protection. A dedicated indexer (for example Alchemy's Data API) would be more robust for production.
-- **Contract logs are read one page at a time.** On a very busy contract, older invoices could stop resolving until pagination is added.
-- **Activity is limited** to the 20 most recent USDC and EURC transfers per wallet, and requests to the 8 most recent.
-- **Messages are public.** A memo is stored on-chain with the payment, so do not put private information in it.
-- **Users must have logged in once** before they can be found by username, email or user ID. Anyone can still be paid by raw address.
-- **Only Ethereum embedded wallets** are supported, and email is the only login method.
+🔴 high impact · 🟠 medium · 🟡 low
+
+- 🟡 **Two transactions per payment.** The wallet approves the exact amount, then calls the contract.
+- 🟠 **Explorer dependency.** Activity and invoice data come from the Arc explorer API, which sits behind bot protection. A dedicated indexer (for example Alchemy's Data API) would be more robust for production.
+- 🟠 **Contract logs are read one page at a time.** On a very busy contract, older invoices could stop resolving until pagination is added.
+- 🟡 **Activity is limited** to the 20 most recent USDC and EURC transfers per wallet, and requests to the 8 most recent.
+- 🔴 **Messages are public.** A memo is stored on-chain with the payment, so do not put private information in it.
+- 🟡 **Users must have logged in once** before they can be found by username, email or user ID. Anyone can still be paid by raw address.
+- 🟡 **Only Ethereum embedded wallets** are supported, and email is the only login method.
 
 ## 🔒 Security
 
@@ -516,7 +521,6 @@ curl https://<your-worker>.workers.dev/v1/health
 
 > [!CAUTION]
 > Never commit `contracts/.env`. It holds the deployer private key that controls the fee wallet.
-- To lock down CORS, set `FRONTEND_ORIGIN` in `wrangler.toml` to your site's URL.
 
 ## 🤝 Contributing
 
@@ -531,21 +535,21 @@ Found a bug or have an idea? [Open an issue](https://github.com/observer-here/Cr
 
 <div align="center">
 
-[GitHub](https://github.com/observer-here/Cross-Way) ·
-[Pull requests](https://github.com/observer-here/Cross-Way/pulls) ·
-[Issues](https://github.com/observer-here/Cross-Way/issues) ·
-[Arc Docs](https://docs.arc.io) ·
-[Arc Explorer](https://explorer.arc.io) ·
-[Circle Developer Docs](https://developers.circle.com) ·
-[Privy Docs](https://docs.privy.io) ·
-[Viem](https://viem.sh) ·
-[Hardhat](https://hardhat.org) ·
-[Cloudflare Workers](https://developers.cloudflare.com/workers) ·
-[Cloudflare D1](https://developers.cloudflare.com/d1) ·
-[Hono](https://hono.dev) ·
-[Vercel](https://vercel.com/docs) ·
-[X](https://x.com/circle)
+[🐙 GitHub](https://github.com/observer-here/Cross-Way) ·
+[🔀 Pull requests](https://github.com/observer-here/Cross-Way/pulls) ·
+[🐛 Issues](https://github.com/observer-here/Cross-Way/issues) ·
+[📚 Arc Docs](https://docs.arc.io) ·
+[🔎 Arc Explorer](https://explorer.arc.io) ·
+[🪙 Circle Developer Docs](https://developers.circle.com) ·
+[🔐 Privy Docs](https://docs.privy.io) ·
+[🧩 Viem](https://viem.sh) ·
+[👷 Hardhat](https://hardhat.org) ·
+[☁ Cloudflare Workers](https://developers.cloudflare.com/workers) ·
+[🗄 Cloudflare D1](https://developers.cloudflare.com/d1) ·
+[🔥 Hono](https://hono.dev) ·
+[▲ Vercel](https://vercel.com/docs) ·
+[𝕏 X](https://x.com/circle)
 
-Built on Arc by the Cross Way team.
+Built on Arc with 💜 by the Cross Way team.
 
 </div>
